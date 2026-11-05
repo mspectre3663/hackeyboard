@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.pocketworkstation.pckeyboard.LatinKeyboardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:latin="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/LatinkeyboardBaseView"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/keyboard_bottom_padding"
+        android:background="@color/kbd_bg_cyber_neon"
+        latin:symbolColorScheme="white"
+        latin:invertSymbols="false"
+        latin:recolorSymbols="true"
+        latin:shadowRadius="0"
+        latin:keyTextColor="@color/key_text_cyber_neon"
+        latin:keyHintColor="@color/key_hint_cyber_neon"
+        latin:keyBackground="@drawable/btn_keyboard_key_cyber_neon"
+        latin:popupLayout="@layout/input_popup_material_dark"
+        />

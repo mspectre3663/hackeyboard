@@ -47,4 +47,146 @@
     <color name="key_background_pressed_material_light">#2637474F</color>
     <color name="key_text_color_material_light">#000000</color>
     <color name="key_hint_letter_color_material_light">#B337474F</color>
+
+    <!-- 14 New Themes: 5 White, 5 Black, 2 Huawei Y330, 2 Galaxy S5 -->
+
+    <!-- Pure White -->
+    <color name="kbd_bg_pure_white">#ECEFF1</color>
+    <color name="key_bg_pure_white">#FFFFFF</color>
+    <color name="key_stroke_pure_white">#D0D7DE</color>
+    <color name="key_pressed_pure_white">#CFD8DC</color>
+    <color name="key_active_pure_white">#0288D1</color>
+    <color name="key_checked_pure_white">#B3E5FC</color>
+    <color name="key_text_pure_white">#212121</color>
+    <color name="key_hint_pure_white">#78909C</color>
+
+    <!-- Cream Paper -->
+    <color name="kbd_bg_cream_white">#F0EAE1</color>
+    <color name="key_bg_cream_white">#FCFAF5</color>
+    <color name="key_stroke_cream_white">#DDD3C4</color>
+    <color name="key_pressed_cream_white">#E2D7C7</color>
+    <color name="key_active_cream_white">#8D6E63</color>
+    <color name="key_checked_cream_white">#D7CCC8</color>
+    <color name="key_text_cream_white">#3E2723</color>
+    <color name="key_hint_cream_white">#8D6E63</color>
+
+    <!-- Nordic Ice -->
+    <color name="kbd_bg_nordic_ice">#E0E9F2</color>
+    <color name="key_bg_nordic_ice">#F5F9FD</color>
+    <color name="key_stroke_nordic_ice">#C2D6E9</color>
+    <color name="key_pressed_nordic_ice">#B8D3EC</color>
+    <color name="key_active_nordic_ice">#0277BD</color>
+    <color name="key_checked_nordic_ice">#B3E5FC</color>
+    <color name="key_text_nordic_ice">#0B253A</color>
+    <color name="key_hint_nordic_ice">#4A779D</color>
+
+    <!-- Soft Lavender -->
+    <color name="kbd_bg_lavender_white">#EBE4F3</color>
+    <color name="key_bg_lavender_white">#FAF6FD</color>
+    <color name="key_stroke_lavender_white">#D6C8E6</color>
+    <color name="key_pressed_lavender_white">#D1BFE4</color>
+    <color name="key_active_lavender_white">#673AB7</color>
+    <color name="key_checked_lavender_white">#D1C4E9</color>
+    <color name="key_text_lavender_white">#311B92</color>
+    <color name="key_hint_lavender_white">#7E57C2</color>
+
+    <!-- Modern Silver -->
+    <color name="kbd_bg_silver_light">#CFD4DA</color>
+    <color name="key_bg_silver_light">#FFFFFF</color>
+    <color name="key_stroke_silver_light">#B0B8C1</color>
+    <color name="key_pressed_silver_light">#BCC3CB</color>
+    <color name="key_active_silver_light">#37474F</color>
+    <color name="key_checked_silver_light">#CFD8DC</color>
+    <color name="key_text_silver_light">#101418</color>
+    <color name="key_hint_silver_light">#607D8B</color>
+
+    <!-- Pitch Black OLED -->
+    <color name="kbd_bg_oled_black">#000000</color>
+    <color name="key_bg_oled_black">#141414</color>
+    <color name="key_stroke_oled_black">#292929</color>
+    <color name="key_pressed_oled_black">#363636</color>
+    <color name="key_active_oled_black">#FFFFFF</color>
+    <color name="key_checked_oled_black">#2196F3</color>
+    <color name="key_text_oled_black">#FFFFFF</color>
+    <color name="key_hint_oled_black">#757575</color>
+
+    <!-- Cyber Neon -->
+    <color name="kbd_bg_cyber_neon">#08090D</color>
+    <color name="key_bg_cyber_neon">#11141E</color>
+    <color name="key_stroke_cyber_neon">#00E5FF</color>
+    <color name="key_pressed_cyber_neon">#003B46</color>
+    <color name="key_active_cyber_neon">#00E5FF</color>
+    <color name="key_checked_cyber_neon">#00B8D4</color>
+    <color name="key_text_cyber_neon">#00F5FF</color>
+    <color name="key_hint_cyber_neon">#00ACC1</color>
+
+    <!-- Midnight Navy -->
+    <color name="kbd_bg_midnight_navy">#080D1A</color>
+    <color name="key_bg_midnight_navy">#121B30</color>
+    <color name="key_stroke_midnight_navy">#1F2E52</color>
+    <color name="key_pressed_midnight_navy">#243660</color>
+    <color name="key_active_midnight_navy">#2979FF</color>
+    <color name="key_checked_midnight_navy">#1565C0</color>
+    <color name="key_text_midnight_navy">#E3F2FD</color>
+    <color name="key_hint_midnight_navy">#64B5F6</color>
+
+    <!-- Carbon Dark -->
+    <color name="kbd_bg_carbon_dark">#141517</color>
+    <color name="key_bg_carbon_dark">#212326</color>
+    <color name="key_stroke_carbon_dark">#34373C</color>
+    <color name="key_pressed_carbon_dark">#3A3E45</color>
+    <color name="key_active_carbon_dark">#FFB300</color>
+    <color name="key_checked_carbon_dark">#FF8F00</color>
+    <color name="key_text_carbon_dark">#F5F5F5</color>
+    <color name="key_hint_carbon_dark">#FFA000</color>
+
+    <!-- Emerald Forest -->
+    <color name="kbd_bg_emerald_dark">#08120E</color>
+    <color name="key_bg_emerald_dark">#10211A</color>
+    <color name="key_stroke_emerald_dark">#1A382A</color>
+    <color name="key_pressed_emerald_dark">#1B4232</color>
+    <color name="key_active_emerald_dark">#00E676</color>
+    <color name="key_checked_emerald_dark">#00BFA5</color>
+    <color name="key_text_emerald_dark">#E8F5E9</color>
+    <color name="key_hint_emerald_dark">#81C784</color>
+
+    <!-- Huawei Y330 White (Android 4.4.2 KitKat EMUI 2.0) -->
+    <color name="kbd_bg_huawei_y330_white">#E3E5E8</color>
+    <color name="key_bg_huawei_y330_white">#FFFFFF</color>
+    <color name="key_stroke_huawei_y330_white">#C5C9D0</color>
+    <color name="key_pressed_huawei_y330_white">#B2EBF2</color>
+    <color name="key_active_huawei_y330_white">#009688</color>
+    <color name="key_checked_huawei_y330_white">#00BCD4</color>
+    <color name="key_text_huawei_y330_white">#26292E</color>
+    <color name="key_hint_huawei_y330_white">#70757C</color>
+
+    <!-- Huawei Y330 Dark (Android 4.4.2 KitKat EMUI 2.0 style) -->
+    <color name="kbd_bg_huawei_y330_dark">#1D2024</color>
+    <color name="key_bg_huawei_y330_dark">#2A2D33</color>
+    <color name="key_stroke_huawei_y330_dark">#181A1D</color>
+    <color name="key_pressed_huawei_y330_dark">#004D40</color>
+    <color name="key_active_huawei_y330_dark">#00BCD4</color>
+    <color name="key_checked_huawei_y330_dark">#0097A7</color>
+    <color name="key_text_huawei_y330_dark">#F1F3F5</color>
+    <color name="key_hint_huawei_y330_dark">#80DEEA</color>
+
+    <!-- Samsung Galaxy S5 TouchWiz White (Android 4.4.4 KitKat) -->
+    <color name="kbd_bg_galaxy_s5_light">#D4D7DC</color>
+    <color name="key_bg_galaxy_s5_light">#F6F8F9</color>
+    <color name="key_stroke_galaxy_s5_light">#B7BDC7</color>
+    <color name="key_pressed_galaxy_s5_light">#C2D9F5</color>
+    <color name="key_active_galaxy_s5_light">#1E88E5</color>
+    <color name="key_checked_galaxy_s5_light">#64B5F6</color>
+    <color name="key_text_galaxy_s5_light">#252E38</color>
+    <color name="key_hint_galaxy_s5_light">#5C6B7B</color>
+
+    <!-- Samsung Galaxy S5 TouchWiz Dark (Android 4.4.4 KitKat) -->
+    <color name="kbd_bg_galaxy_s5_dark">#1A1D22</color>
+    <color name="key_bg_galaxy_s5_dark">#2B303A</color>
+    <color name="key_stroke_galaxy_s5_dark">#3C434F</color>
+    <color name="key_pressed_galaxy_s5_dark">#1E3A5F</color>
+    <color name="key_active_galaxy_s5_dark">#2196F3</color>
+    <color name="key_checked_galaxy_s5_dark">#1976D2</color>
+    <color name="key_text_galaxy_s5_dark">#FFFFFF</color>
+    <color name="key_hint_galaxy_s5_dark">#64B5F6</color>
 </resources>

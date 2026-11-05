@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Action keys (Shift/Enter active) -->
+    <item android:state_active="true" android:state_pressed="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_pressed_cream_white" />
+                <corners android:radius="4dp" />
+            </shape>
+        </inset>
+    </item>
+    <item android:state_active="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_active_cream_white" />
+                <corners android:radius="4dp" />
+            </shape>
+        </inset>
+    </item>
+
+    <!-- Toggle keys -->
+    <item android:state_checkable="true" android:state_checked="true" android:state_pressed="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_pressed_cream_white" />
+                <corners android:radius="4dp" />
+                <stroke android:width="1.5dp" android:color="@color/key_active_cream_white" />
+            </shape>
+        </inset>
+    </item>
+    <item android:state_checkable="true" android:state_pressed="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_pressed_cream_white" />
+                <corners android:radius="4dp" />
+            </shape>
+        </inset>
+    </item>
+    <item android:state_checkable="true" android:state_checked="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_checked_cream_white" />
+                <corners android:radius="4dp" />
+                <stroke android:width="1.5dp" android:color="@color/key_active_cream_white" />
+            </shape>
+        </inset>
+    </item>
+    <item android:state_checkable="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_bg_cream_white" />
+                <corners android:radius="4dp" />
+                <stroke android:width="1dp" android:color="@color/key_stroke_cream_white" />
+            </shape>
+        </inset>
+    </item>
+
+    <!-- Empty background keys -->
+    <item android:state_empty="true" android:state_pressed="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_pressed_cream_white" />
+                <corners android:radius="4dp" />
+            </shape>
+        </inset>
+    </item>
+    <item android:state_empty="true" android:drawable="@android:color/transparent" />
+
+    <!-- Normal keys -->
+    <item android:state_pressed="true">
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_pressed_cream_white" />
+                <corners android:radius="4dp" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset android:insetLeft="2dp" android:insetRight="2dp" android:insetTop="2dp" android:insetBottom="2dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/key_bg_cream_white" />
+                <corners android:radius="4dp" />
+                <stroke android:width="1dp" android:color="@color/key_stroke_cream_white" />
+            </shape>
+        </inset>
+    </item>
+</selector>

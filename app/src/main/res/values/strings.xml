@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
 **
@@ -358,6 +358,22 @@
     <string name="layout_material_dark" translatable="false">Material Dark</string>
     <string name="layout_material_light" translatable="false">Material Light</string>
 
+    <!-- 14 New Themes: 5 White, 5 Black, 2 Huawei Y330, 2 Galaxy S5 -->
+    <string name="layout_pure_white" translatable="false">Pure White</string>
+    <string name="layout_cream_white" translatable="false">Cream Paper</string>
+    <string name="layout_nordic_ice" translatable="false">Nordic Ice</string>
+    <string name="layout_lavender_white" translatable="false">Soft Lavender</string>
+    <string name="layout_silver_light" translatable="false">Modern Silver</string>
+    <string name="layout_oled_black" translatable="false">Pitch Black OLED</string>
+    <string name="layout_cyber_neon" translatable="false">Cyber Neon</string>
+    <string name="layout_midnight_navy" translatable="false">Midnight Navy</string>
+    <string name="layout_carbon_dark" translatable="false">Carbon Dark</string>
+    <string name="layout_emerald_dark" translatable="false">Emerald Forest</string>
+    <string name="layout_huawei_y330_white" translatable="false">Huawei Y330 White (Android 4.4)</string>
+    <string name="layout_huawei_y330_dark" translatable="false">Huawei Y330 Dark (Android 4.4)</string>
+    <string name="layout_galaxy_s5_light" translatable="false">Galaxy S5 TouchWiz White (Android 4.4)</string>
+    <string name="layout_galaxy_s5_dark" translatable="false">Galaxy S5 TouchWiz Dark (Android 4.4)</string>
+
     <string-array name="keyboard_layout_modes" translatable="false">
         <item>@string/layout_ics</item>
         <item>@string/layout_ics_darker</item>
@@ -367,6 +383,24 @@
         <item>@string/layout_gingerbread</item>
         <item>@string/layout_stone_bold</item>
         <item>@string/layout_trans_neon</item>
+        <!-- 5 White themes -->
+        <item>@string/layout_pure_white</item>
+        <item>@string/layout_cream_white</item>
+        <item>@string/layout_nordic_ice</item>
+        <item>@string/layout_lavender_white</item>
+        <item>@string/layout_silver_light</item>
+        <!-- 5 Black themes -->
+        <item>@string/layout_oled_black</item>
+        <item>@string/layout_cyber_neon</item>
+        <item>@string/layout_midnight_navy</item>
+        <item>@string/layout_carbon_dark</item>
+        <item>@string/layout_emerald_dark</item>
+        <!-- 2 Huawei Y330 themes -->
+        <item>@string/layout_huawei_y330_white</item>
+        <item>@string/layout_huawei_y330_dark</item>
+        <!-- 2 Samsung Galaxy S5 themes -->
+        <item>@string/layout_galaxy_s5_light</item>
+        <item>@string/layout_galaxy_s5_dark</item>
     </string-array>
 
     <!--
@@ -384,6 +418,24 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
+        <!-- 5 White themes -->
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <!-- 5 Black themes -->
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <!-- 2 Huawei Y330 themes -->
+        <item>18</item>
+        <item>19</item>
+        <!-- 2 Samsung Galaxy S5 themes -->
+        <item>20</item>
+        <item>21</item>
     </string-array>
 
     <string name="subtype_mode_keyboard">keyboard</string>

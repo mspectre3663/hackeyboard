@@ -70,6 +70,24 @@ public class KeyboardSwitcher implements
         R.layout.input_material_light,
         R.layout.input_ics_darker,
         R.layout.input_material_black,
+        // 5 White Themes
+        R.layout.input_pure_white, // 8
+        R.layout.input_cream_white, // 9
+        R.layout.input_nordic_ice, // 10
+        R.layout.input_lavender_white, // 11
+        R.layout.input_silver_light, // 12
+        // 5 Black Themes
+        R.layout.input_oled_black, // 13
+        R.layout.input_cyber_neon, // 14
+        R.layout.input_midnight_navy, // 15
+        R.layout.input_carbon_dark, // 16
+        R.layout.input_emerald_dark, // 17
+        // 2 Huawei Y330 Themes (Android 4.4.2 KitKat EMUI 2.0)
+        R.layout.input_huawei_y330_white, // 18
+        R.layout.input_huawei_y330_dark, // 19
+        // 2 Samsung Galaxy S5 Themes (Android 4.4.4 KitKat TouchWiz)
+        R.layout.input_galaxy_s5_light, // 20
+        R.layout.input_galaxy_s5_dark, // 21
     };
 
     // Tables which contains resource ids for each character theme color
