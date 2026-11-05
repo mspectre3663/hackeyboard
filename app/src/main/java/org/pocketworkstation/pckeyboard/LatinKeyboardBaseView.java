@@ -487,52 +487,35 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         for (int i = 0; i < n; i++) {
             int attr = a.getIndex(i);
 
-            switch (attr) {
-            case R.styleable.LatinKeyboardBaseView_keyBackground:
+            if (attr == R.styleable.LatinKeyboardBaseView_keyBackground) {
                 mKeyBackground = a.getDrawable(attr);
-                break;
-            case R.styleable.LatinKeyboardBaseView_keyHysteresisDistance:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_keyHysteresisDistance) {
                 mKeyHysteresisDistance = a.getDimensionPixelOffset(attr, 0);
-                break;
-            case R.styleable.LatinKeyboardBaseView_verticalCorrection:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_verticalCorrection) {
                 mVerticalCorrection = a.getDimensionPixelOffset(attr, 0);
-                break;
-            case R.styleable.LatinKeyboardBaseView_keyTextSize:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_keyTextSize) {
                 mKeyTextSize = a.getDimensionPixelSize(attr, 18);
-                break;
-            case R.styleable.LatinKeyboardBaseView_keyTextColor:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_keyTextColor) {
                 mKeyTextColor = a.getColor(attr, 0xFF000000);
-                break;
-            case R.styleable.LatinKeyboardBaseView_keyHintColor:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_keyHintColor) {
                 mKeyHintColor = a.getColor(attr, 0xFFBBBBBB);
-                break;
-            case R.styleable.LatinKeyboardBaseView_keyCursorColor:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_keyCursorColor) {
                 mKeyCursorColor = a.getColor(attr, 0xFF000000);
-                break;
-            case R.styleable.LatinKeyboardBaseView_invertSymbols:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_invertSymbols) {
                 mInvertSymbols = a.getBoolean(attr, false);
-                break;
-            case R.styleable.LatinKeyboardBaseView_recolorSymbols:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_recolorSymbols) {
                 mRecolorSymbols = a.getBoolean(attr, false);
-                break;
-            case R.styleable.LatinKeyboardBaseView_labelTextSize:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_labelTextSize) {
                 mLabelTextSize = a.getDimensionPixelSize(attr, 14);
-                break;
-            case R.styleable.LatinKeyboardBaseView_shadowColor:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_shadowColor) {
                 mShadowColor = a.getColor(attr, 0);
-                break;
-            case R.styleable.LatinKeyboardBaseView_shadowRadius:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_shadowRadius) {
                 mShadowRadius = a.getFloat(attr, 0f);
-                break;
-            // TODO: Use Theme (android.R.styleable.Theme_backgroundDimAmount)
-            case R.styleable.LatinKeyboardBaseView_backgroundDimAmount:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_backgroundDimAmount) {
                 mBackgroundDimAmount = a.getFloat(attr, 0.5f);
-                break;
-            case R.styleable.LatinKeyboardBaseView_backgroundAlpha:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_backgroundAlpha) {
                 mBackgroundAlpha = a.getInteger(attr, 255);
-                break;
-            //case android.R.styleable.
-            case R.styleable.LatinKeyboardBaseView_keyTextStyle:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_keyTextStyle) {
                 int textStyle = a.getInt(attr, 0);
                 switch (textStyle) {
                     case 0:
@@ -545,10 +528,8 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                         mKeyTextStyle = Typeface.defaultFromStyle(textStyle);
                         break;
                 }
-                break;
-            case R.styleable.LatinKeyboardBaseView_symbolColorScheme:
+            } else if (attr == R.styleable.LatinKeyboardBaseView_symbolColorScheme) {
                 mSymbolColorScheme = a.getInt(attr, 0);
-                break;
             }
         }
 
@@ -970,6 +951,15 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         mKeyTextSize = Math.min(medianKeyHeight * 6 / 10, medianKeyWidth * 6 / 10);
         mLabelTextSize = mKeyTextSize * 3 / 4;
 
+        boolean isPersian = false;
+        if (mKeyboard instanceof LatinKeyboard) {
+            isPersian = ((LatinKeyboard) mKeyboard).isPersianKeyboard();
+        } else if (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale)) {
+            isPersian = true;
+        }
+        Typeface vazirTypeface = isPersian ? FontUtils.getVazirTypeface(getContext()) : null;
+        Typeface vazirBoldTypeface = isPersian ? FontUtils.getVazirBoldTypeface(getContext()) : null;
+
         int keysDrawn = 0;
         for (int i = 0; i < keyCount; i++) {
             final Key key = keys[i];
@@ -1016,15 +1006,19 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
 
             boolean shouldDrawIcon = true;
             if (label != null) {
+                boolean keyIsPersian = isPersian || FontUtils.containsPersian(label);
+                Typeface keyVazir = keyIsPersian ? (vazirTypeface != null ? vazirTypeface : FontUtils.getVazirTypeface(getContext())) : null;
+                Typeface keyVazirBold = keyIsPersian ? (vazirBoldTypeface != null ? vazirBoldTypeface : FontUtils.getVazirBoldTypeface(getContext())) : null;
+
                 // For characters, use large font. For labels like "Done", use small font.
                 final int labelSize;
                 if (label.length() > 1 && key.codes.length < 2) {
                     //Log.i(TAG, "mLabelTextSize=" + mLabelTextSize + " LatinIME.sKeyboardSettings.labelScale=" + LatinIME.sKeyboardSettings.labelScale);
                     labelSize = (int)(mLabelTextSize * mLabelScale);
-                    paint.setTypeface(Typeface.DEFAULT);
+                    paint.setTypeface(keyIsPersian ? keyVazir : Typeface.DEFAULT);
                 } else {
                     labelSize = (int)(mKeyTextSize * mLabelScale);
-                    paint.setTypeface(mKeyTextStyle);
+                    paint.setTypeface(keyIsPersian ? (mKeyTextStyle == Typeface.DEFAULT_BOLD ? keyVazirBold : keyVazir) : mKeyTextStyle);
                 }
                 paint.setFakeBoldText(key.isCursor);
                 paint.setTextSize(labelSize);
@@ -1037,6 +1031,8 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                 // Draw hint label (if present) behind the main key
                 String hint = key.getHintLabel(showHints7Bit(), showHintsAll());
                 if (!hint.equals("") && !(key.isShifted() && key.shiftLabel != null && hint.charAt(0) == key.shiftLabel.charAt(0))) {
+                    boolean hintIsPersian = isPersian || FontUtils.containsPersian(hint);
+                    paintHint.setTypeface(hintIsPersian ? (vazirBoldTypeface != null ? vazirBoldTypeface : FontUtils.getVazirBoldTypeface(getContext())) : Typeface.DEFAULT_BOLD);
                     int hintTextSize = (int)(mKeyTextSize * 0.6 * mLabelScale);
                     paintHint.setTextSize(hintTextSize);
 
@@ -1053,6 +1049,8 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                 // Draw alternate hint label (if present) behind the main key
                 String altHint = key.getAltHintLabel(showHints7Bit(), showHintsAll());
                 if (!altHint.equals("")) {
+                    boolean altHintIsPersian = isPersian || FontUtils.containsPersian(altHint);
+                    paintHint.setTypeface(altHintIsPersian ? (vazirBoldTypeface != null ? vazirBoldTypeface : FontUtils.getVazirBoldTypeface(getContext())) : Typeface.DEFAULT_BOLD);
                     int hintTextSize = (int)(mKeyTextSize * 0.6 * mLabelScale);
                     paintHint.setTextSize(hintTextSize);
 
@@ -1221,13 +1219,24 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             mPreviewText.setText(null);
         } else {
             mPreviewText.setCompoundDrawables(null, null, null, null);
-            mPreviewText.setText(key.getCaseLabel());
+            CharSequence caseLabel = key.getCaseLabel();
+            mPreviewText.setText(caseLabel);
+            boolean isPersian = false;
+            if (mKeyboard instanceof LatinKeyboard) {
+                isPersian = ((LatinKeyboard) mKeyboard).isPersianKeyboard();
+            } else if (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale)) {
+                isPersian = true;
+            }
+            boolean keyIsPersian = isPersian || FontUtils.containsPersian(caseLabel) || FontUtils.containsPersian(key.label);
+            Typeface vazirBold = keyIsPersian ? FontUtils.getVazirBoldTypeface(getContext()) : Typeface.DEFAULT_BOLD;
+            Typeface vazirNorm = keyIsPersian ? FontUtils.getVazirTypeface(getContext()) : mKeyTextStyle;
+
             if (key.label.length() > 1 && key.codes.length < 2) {
                 mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mKeyTextSize);
-                mPreviewText.setTypeface(Typeface.DEFAULT_BOLD);
+                mPreviewText.setTypeface(vazirBold);
             } else {
                 mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mPreviewTextSizeLarge);
-                mPreviewText.setTypeface(mKeyTextStyle);
+                mPreviewText.setTypeface(mKeyTextStyle == Typeface.DEFAULT_BOLD ? vazirBold : vazirNorm);
             }
         }
         mPreviewText.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),

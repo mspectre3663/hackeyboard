@@ -69,6 +69,8 @@ public class LatinKeyboard extends Keyboard {
     private int mSpaceDragStartX;
     private int mSpaceDragLastDiff;
     private Locale mLocale;
+    private Locale mActualInputLocale;
+    private Boolean mIsPersianLayout = null;
     private LanguageSwitcher mLanguageSwitcher;
     private final Resources mRes;
     private final Context mContext;
@@ -505,6 +507,9 @@ public class LatinKeyboard extends Keyboard {
             paint.setAlpha(opacity);
             paint.setAntiAlias(true);
             paint.setTextAlign(Align.CENTER);
+            if (isPersianKeyboard()) {
+                paint.setTypeface(FontUtils.getVazirTypeface(mContext));
+            }
 
             final boolean allowVariableTextSize = true;
             Locale locale = mLanguageSwitcher.getInputLocale();
@@ -582,11 +587,50 @@ public class LatinKeyboard extends Keyboard {
         return mSpaceDragLastDiff > 0 ? 1 : -1;
     }
 
+    public void setInputLocale(Locale locale) {
+        mActualInputLocale = locale;
+        mIsPersianLayout = null;
+    }
+
+    public Locale getInputLocale() {
+        if (mActualInputLocale != null) return mActualInputLocale;
+        if (mLanguageSwitcher != null) return mLanguageSwitcher.getInputLocale();
+        return mLocale;
+    }
+
+    public boolean isPersianKeyboard() {
+        if (mActualInputLocale != null && FontUtils.isPersianLocale(mActualInputLocale)) {
+            return true;
+        }
+        if (mLanguageSwitcher != null && FontUtils.isPersianLocale(mLanguageSwitcher.getInputLocale())) {
+            return true;
+        }
+        if (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale)) {
+            return true;
+        }
+        if (mIsPersianLayout == null) {
+            boolean hasPersian = false;
+            List<Key> keys = getKeys();
+            if (keys != null) {
+                for (Key key : keys) {
+                    if (FontUtils.containsPersian(key.label) || FontUtils.containsPersian(key.text)) {
+                        hasPersian = true;
+                        break;
+                    }
+                }
+            }
+            mIsPersianLayout = hasPersian;
+        }
+        return mIsPersianLayout != null && mIsPersianLayout;
+    }
+
     public void setLanguageSwitcher(LanguageSwitcher switcher, boolean isAutoCompletion) {
         mLanguageSwitcher = switcher;
-        Locale locale = mLanguageSwitcher.getLocaleCount() > 0
-                ? mLanguageSwitcher.getInputLocale()
+        mActualInputLocale = (switcher != null && switcher.getLocaleCount() > 0)
+                ? switcher.getInputLocale()
                 : null;
+        mIsPersianLayout = null;
+        Locale locale = mActualInputLocale;
         // If the language count is 1 and is the same as the system language, don't show it.
         if (locale != null
                 && mLanguageSwitcher.getLocaleCount() == 1
@@ -919,6 +963,9 @@ public class LatinKeyboard extends Keyboard {
                     mCurrentLanguage = getLanguageName(languageSwitcher.getInputLocale());
                     mNextLanguage = getLanguageName(languageSwitcher.getNextInputLocale());
                     mPrevLanguage = getLanguageName(languageSwitcher.getPrevInputLocale());
+                }
+                if (isPersianKeyboard() || FontUtils.containsPersian(mCurrentLanguage)) {
+                    paint.setTypeface(FontUtils.getVazirTypeface(mContext));
                 }
                 // Draw language text with shadow
                 final float baseline = mHeight * SPACEBAR_LANGUAGE_BASELINE - paint.descent();

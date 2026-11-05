@@ -1,0 +1,6 @@
+{
+  "name": "Hacker's Keyboard",
+  "description": "Full 5-row keyboard with arrow keys, Ctrl/Alt/Esc/Tab, and multiple layouts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

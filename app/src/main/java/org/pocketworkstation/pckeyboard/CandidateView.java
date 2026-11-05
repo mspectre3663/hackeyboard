@@ -241,16 +241,24 @@ public class CandidateView extends View {
             if (suggestion == null) continue;
             final int wordLength = suggestion.length();
 
+            boolean isPersian = (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale))
+                    || FontUtils.containsPersian(suggestion);
+            Typeface normTypeface = isPersian ? FontUtils.getVazirTypeface(getContext()) : Typeface.DEFAULT;
+            Typeface boldTypeface = isPersian ? FontUtils.getVazirBoldTypeface(getContext()) : Typeface.DEFAULT_BOLD;
+
             paint.setColor(mColorNormal);
             if (mHaveMinimalSuggestion 
                     && ((i == 1 && !typedWordValid) || (i == 0 && typedWordValid))) {
-                paint.setTypeface(Typeface.DEFAULT_BOLD);
+                paint.setTypeface(boldTypeface);
                 paint.setColor(mColorRecommended);
                 existsAutoCompletion = true;
-            } else if (i != 0 || (wordLength == 1 && count > 1)) {
-                // HACK: even if i == 0, we use mColorOther when this suggestion's length is 1 and
-                // there are multiple suggestions, such as the default punctuation list.
-                paint.setColor(mColorOther);
+            } else {
+                paint.setTypeface(normTypeface);
+                if (i != 0 || (wordLength == 1 && count > 1)) {
+                    // HACK: even if i == 0, we use mColorOther when this suggestion's length is 1 and
+                    // there are multiple suggestions, such as the default punctuation list.
+                    paint.setColor(mColorOther);
+                }
             }
             int wordWidth;
             if ((wordWidth = mWordWidth[i]) == 0) {

@@ -332,6 +332,7 @@ public class KeyboardSwitcher implements
             orig.updateConfiguration(conf, null);
             keyboard = new LatinKeyboard(mInputMethodService, id.mXml,
                     id.mKeyboardMode, id.mKeyboardHeightPercent);
+            keyboard.setInputLocale(conf.locale);
             keyboard.setVoiceMode(hasVoiceButton(id.mXml == R.xml.kbd_symbols), mHasVoice);
             keyboard.setLanguageSwitcher(mLanguageSwitcher, mIsAutoCompletionActive);
 //            if (isFullMode()) {

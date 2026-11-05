@@ -177,6 +177,7 @@ public class BinaryDictionary extends Dictionary {
     @Override
     public void getBigrams(final WordComposer codes, final CharSequence previousWord,
             final WordCallback callback, int[] nextLettersFrequencies) {
+        if (mNativeDict == 0) return;
 
         char[] chars = previousWord.toString().toCharArray();
         Arrays.fill(mOutputChars_bigrams, (char) 0);
