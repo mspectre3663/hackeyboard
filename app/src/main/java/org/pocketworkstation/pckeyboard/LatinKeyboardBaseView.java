@@ -658,6 +658,9 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             tracker.setKeyboard(mKeys, mKeyHysteresisDistance);
         }
         mLabelScale = LatinIME.sKeyboardSettings.labelScalePref;
+        if (LatinIME.sKeyboardSettings != null && LatinIME.sKeyboardSettings.fontScale > 0.0f) {
+            mLabelScale *= LatinIME.sKeyboardSettings.fontScale;
+        }
         //if (keyboard.mLayoutRows >= 4) mLabelScale *= 5.0f / keyboard.mLayoutRows;
         requestLayout();
         // Hint to reallocate the buffer if the size changed
@@ -957,8 +960,10 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         } else if (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale)) {
             isPersian = true;
         }
-        Typeface vazirTypeface = isPersian ? FontUtils.getVazirTypeface(getContext()) : null;
-        Typeface vazirBoldTypeface = isPersian ? FontUtils.getVazirBoldTypeface(getContext()) : null;
+        Typeface faTypeface = FontUtils.getPersianTypeface(getContext());
+        Typeface faBoldTypeface = FontUtils.getPersianBoldTypeface(getContext());
+        Typeface enTypeface = FontUtils.getEnglishTypeface(getContext());
+        Typeface enBoldTypeface = FontUtils.getEnglishBoldTypeface(getContext());
 
         int keysDrawn = 0;
         for (int i = 0; i < keyCount; i++) {
@@ -1007,18 +1012,18 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             boolean shouldDrawIcon = true;
             if (label != null) {
                 boolean keyIsPersian = isPersian || FontUtils.containsPersian(label);
-                Typeface keyVazir = keyIsPersian ? (vazirTypeface != null ? vazirTypeface : FontUtils.getVazirTypeface(getContext())) : null;
-                Typeface keyVazirBold = keyIsPersian ? (vazirBoldTypeface != null ? vazirBoldTypeface : FontUtils.getVazirBoldTypeface(getContext())) : null;
+                Typeface keyNorm = keyIsPersian ? faTypeface : (enTypeface != null ? enTypeface : mKeyTextStyle);
+                Typeface keyBold = keyIsPersian ? faBoldTypeface : (enBoldTypeface != null ? enBoldTypeface : Typeface.DEFAULT_BOLD);
 
                 // For characters, use large font. For labels like "Done", use small font.
                 final int labelSize;
                 if (label.length() > 1 && key.codes.length < 2) {
                     //Log.i(TAG, "mLabelTextSize=" + mLabelTextSize + " LatinIME.sKeyboardSettings.labelScale=" + LatinIME.sKeyboardSettings.labelScale);
                     labelSize = (int)(mLabelTextSize * mLabelScale);
-                    paint.setTypeface(keyIsPersian ? keyVazir : Typeface.DEFAULT);
+                    paint.setTypeface(keyIsPersian ? keyNorm : (enTypeface != null ? enTypeface : Typeface.DEFAULT));
                 } else {
                     labelSize = (int)(mKeyTextSize * mLabelScale);
-                    paint.setTypeface(keyIsPersian ? (mKeyTextStyle == Typeface.DEFAULT_BOLD ? keyVazirBold : keyVazir) : mKeyTextStyle);
+                    paint.setTypeface(mKeyTextStyle == Typeface.DEFAULT_BOLD ? keyBold : keyNorm);
                 }
                 paint.setFakeBoldText(key.isCursor);
                 paint.setTextSize(labelSize);
@@ -1032,7 +1037,8 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                 String hint = key.getHintLabel(showHints7Bit(), showHintsAll());
                 if (!hint.equals("") && !(key.isShifted() && key.shiftLabel != null && hint.charAt(0) == key.shiftLabel.charAt(0))) {
                     boolean hintIsPersian = isPersian || FontUtils.containsPersian(hint);
-                    paintHint.setTypeface(hintIsPersian ? (vazirBoldTypeface != null ? vazirBoldTypeface : FontUtils.getVazirBoldTypeface(getContext())) : Typeface.DEFAULT_BOLD);
+                    Typeface hintTf = hintIsPersian ? faBoldTypeface : (enBoldTypeface != null ? enBoldTypeface : Typeface.DEFAULT_BOLD);
+                    paintHint.setTypeface(hintTf);
                     int hintTextSize = (int)(mKeyTextSize * 0.6 * mLabelScale);
                     paintHint.setTextSize(hintTextSize);
 
@@ -1050,7 +1056,8 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                 String altHint = key.getAltHintLabel(showHints7Bit(), showHintsAll());
                 if (!altHint.equals("")) {
                     boolean altHintIsPersian = isPersian || FontUtils.containsPersian(altHint);
-                    paintHint.setTypeface(altHintIsPersian ? (vazirBoldTypeface != null ? vazirBoldTypeface : FontUtils.getVazirBoldTypeface(getContext())) : Typeface.DEFAULT_BOLD);
+                    Typeface altHintTf = altHintIsPersian ? faBoldTypeface : (enBoldTypeface != null ? enBoldTypeface : Typeface.DEFAULT_BOLD);
+                    paintHint.setTypeface(altHintTf);
                     int hintTextSize = (int)(mKeyTextSize * 0.6 * mLabelScale);
                     paintHint.setTextSize(hintTextSize);
 
@@ -1228,15 +1235,17 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                 isPersian = true;
             }
             boolean keyIsPersian = isPersian || FontUtils.containsPersian(caseLabel) || FontUtils.containsPersian(key.label);
-            Typeface vazirBold = keyIsPersian ? FontUtils.getVazirBoldTypeface(getContext()) : Typeface.DEFAULT_BOLD;
-            Typeface vazirNorm = keyIsPersian ? FontUtils.getVazirTypeface(getContext()) : mKeyTextStyle;
+            Typeface normTf = keyIsPersian ? FontUtils.getPersianTypeface(getContext())
+                    : (FontUtils.getEnglishTypeface(getContext()) != null ? FontUtils.getEnglishTypeface(getContext()) : mKeyTextStyle);
+            Typeface boldTf = keyIsPersian ? FontUtils.getPersianBoldTypeface(getContext())
+                    : (FontUtils.getEnglishBoldTypeface(getContext()) != null ? FontUtils.getEnglishBoldTypeface(getContext()) : Typeface.DEFAULT_BOLD);
 
             if (key.label.length() > 1 && key.codes.length < 2) {
                 mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mKeyTextSize);
-                mPreviewText.setTypeface(vazirBold);
+                mPreviewText.setTypeface(boldTf);
             } else {
                 mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mPreviewTextSizeLarge);
-                mPreviewText.setTypeface(mKeyTextStyle == Typeface.DEFAULT_BOLD ? vazirBold : vazirNorm);
+                mPreviewText.setTypeface(mKeyTextStyle == Typeface.DEFAULT_BOLD ? boldTf : normTf);
             }
         }
         mPreviewText.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),

@@ -1,63 +1,155 @@
 package org.pocketworkstation.pckeyboard;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import androidx.core.content.res.ResourcesCompat;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class FontUtils {
     private static final String TAG = "FontUtils";
-    private static Typeface sVazirTypeface = null;
-    private static Typeface sVazirBoldTypeface = null;
+    private static final Map<String, Typeface> sTypefaceCache = new HashMap<String, Typeface>();
 
-    public static synchronized Typeface getVazirTypeface(Context context) {
-        if (sVazirTypeface != null) {
-            return sVazirTypeface;
-        }
-        if (context == null) {
-            return Typeface.DEFAULT;
-        }
-        try {
-            sVazirTypeface = ResourcesCompat.getFont(context, R.font.vazir);
-        } catch (Throwable t) {
-            Log.w(TAG, "Could not load R.font.vazir", t);
-        }
-        if (sVazirTypeface == null) {
-            try {
-                sVazirTypeface = Typeface.createFromAsset(context.getAssets(), "vazir.ttf");
-            } catch (Throwable t) {
-                Log.w(TAG, "Could not load asset vazir.ttf", t);
-            }
-        }
-        if (sVazirTypeface == null) {
-            try {
-                File f = new File(context.getFilesDir(), "vazir.ttf");
-                if (f.exists()) {
-                    sVazirTypeface = Typeface.createFromFile(f);
-                }
-            } catch (Throwable t) {
-                Log.w(TAG, "Could not load file vazir.ttf", t);
-            }
-        }
-        if (sVazirTypeface == null) {
-            sVazirTypeface = Typeface.DEFAULT;
-        }
-        return sVazirTypeface;
+    public static synchronized void clearCache() {
+        sTypefaceCache.clear();
     }
 
-    public static synchronized Typeface getVazirBoldTypeface(Context context) {
-        if (sVazirBoldTypeface != null) {
-            return sVazirBoldTypeface;
-        }
-        Typeface base = getVazirTypeface(context);
-        if (base != null && base != Typeface.DEFAULT) {
-            sVazirBoldTypeface = Typeface.create(base, Typeface.BOLD);
+    public static synchronized Typeface getPersianTypeface(Context context) {
+        if (context == null) return Typeface.DEFAULT;
+
+        String fontName = null;
+        if (LatinIME.sKeyboardSettings != null && LatinIME.sKeyboardSettings.fontFa != null && !LatinIME.sKeyboardSettings.fontFa.isEmpty()) {
+            fontName = LatinIME.sKeyboardSettings.fontFa;
         } else {
-            sVazirBoldTypeface = Typeface.DEFAULT_BOLD;
+            try {
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+                fontName = sp.getString("pref_font_fa", "vazir.ttf");
+            } catch (Throwable t) {
+                fontName = "vazir.ttf";
+            }
         }
-        return sVazirBoldTypeface;
+        if (fontName == null || fontName.trim().isEmpty()) {
+            fontName = "vazir.ttf";
+        }
+
+        String cacheKey = "fa:" + fontName;
+        if (sTypefaceCache.containsKey(cacheKey)) {
+            Typeface cached = sTypefaceCache.get(cacheKey);
+            if (cached != null) return cached;
+        }
+
+        Typeface tf = loadTypeface(context, "fontFA/" + fontName);
+        if (tf == null && !fontName.equals("vazir.ttf")) {
+            tf = loadTypeface(context, "fontFA/vazir.ttf");
+        }
+        if (tf == null) {
+            try {
+                tf = ResourcesCompat.getFont(context, R.font.vazir);
+            } catch (Throwable ignored) {}
+        }
+        if (tf == null) {
+            try {
+                tf = Typeface.createFromAsset(context.getAssets(), "vazir.ttf");
+            } catch (Throwable ignored) {}
+        }
+        if (tf == null) {
+            tf = Typeface.DEFAULT;
+        }
+
+        sTypefaceCache.put(cacheKey, tf);
+        return tf;
+    }
+
+    public static synchronized Typeface getPersianBoldTypeface(Context context) {
+        if (context == null) return Typeface.DEFAULT_BOLD;
+        String fontName = (LatinIME.sKeyboardSettings != null && LatinIME.sKeyboardSettings.fontFa != null)
+                ? LatinIME.sKeyboardSettings.fontFa : "vazir.ttf";
+        String cacheKey = "fa_bold:" + fontName;
+        if (sTypefaceCache.containsKey(cacheKey)) {
+            Typeface cached = sTypefaceCache.get(cacheKey);
+            if (cached != null) return cached;
+        }
+
+        Typeface base = getPersianTypeface(context);
+        Typeface bold = (base != null && base != Typeface.DEFAULT)
+                ? Typeface.create(base, Typeface.BOLD) : Typeface.DEFAULT_BOLD;
+        sTypefaceCache.put(cacheKey, bold);
+        return bold;
+    }
+
+    public static synchronized Typeface getEnglishTypeface(Context context) {
+        if (context == null) return null;
+
+        String fontName = null;
+        if (LatinIME.sKeyboardSettings != null && LatinIME.sKeyboardSettings.fontEn != null) {
+            fontName = LatinIME.sKeyboardSettings.fontEn;
+        } else {
+            try {
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+                fontName = sp.getString("pref_font_en", "");
+            } catch (Throwable t) {
+                fontName = "";
+            }
+        }
+        if (fontName == null || fontName.trim().isEmpty()) {
+            return null; // System default
+        }
+
+        String cacheKey = "en:" + fontName;
+        if (sTypefaceCache.containsKey(cacheKey)) {
+            return sTypefaceCache.get(cacheKey);
+        }
+
+        Typeface tf = loadTypeface(context, "fontEN/" + fontName);
+        sTypefaceCache.put(cacheKey, tf);
+        return tf;
+    }
+
+    public static synchronized Typeface getEnglishBoldTypeface(Context context) {
+        if (context == null) return null;
+        Typeface base = getEnglishTypeface(context);
+        if (base == null) return null;
+
+        String fontName = (LatinIME.sKeyboardSettings != null && LatinIME.sKeyboardSettings.fontEn != null)
+                ? LatinIME.sKeyboardSettings.fontEn : "";
+        String cacheKey = "en_bold:" + fontName;
+        if (sTypefaceCache.containsKey(cacheKey)) {
+            return sTypefaceCache.get(cacheKey);
+        }
+
+        Typeface bold = Typeface.create(base, Typeface.BOLD);
+        sTypefaceCache.put(cacheKey, bold);
+        return bold;
+    }
+
+    private static Typeface loadTypeface(Context context, String assetPath) {
+        if (context == null || assetPath == null) return null;
+        try {
+            return Typeface.createFromAsset(context.getAssets(), assetPath);
+        } catch (Throwable t) {
+            Log.d(TAG, "createFromAsset failed for " + assetPath + ": " + t.getMessage());
+        }
+        try {
+            File f = new File(context.getFilesDir(), assetPath);
+            if (f.exists()) {
+                return Typeface.createFromFile(f);
+            }
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
+    // Backwards compatibility methods
+    public static Typeface getVazirTypeface(Context context) {
+        return getPersianTypeface(context);
+    }
+
+    public static Typeface getVazirBoldTypeface(Context context) {
+        return getPersianBoldTypeface(context);
     }
 
     public static boolean isPersianLocale(Locale locale) {

@@ -54,3 +54,15 @@ dependencies {
     implementation 'androidx.core:core:1.15.0'
     testImplementation 'junit:junit:4.13.2'
 }
+
+tasks.register('syncCustomFonts', Copy) {
+    from('src/main/res/fontFA') {
+        into('fontFA')
+    }
+    from('src/main/res/fontEN') {
+        into('fontEN')
+    }
+    into('src/main/assets')
+}
+
+preBuild.dependsOn syncCustomFonts

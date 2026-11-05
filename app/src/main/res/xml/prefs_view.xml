@@ -77,4 +77,35 @@
             android:title="@string/title_render_mode" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="font_settings"
+        android:title="@string/title_font_settings" >
+
+        <org.pocketworkstation.pckeyboard.AutoSummaryListPreference
+            android:defaultValue="vazir.ttf"
+            android:entries="@array/font_fa_entries"
+            android:entryValues="@array/font_fa_values"
+            android:key="pref_font_fa"
+            android:persistent="true"
+            android:title="@string/title_font_fa" />
+
+        <org.pocketworkstation.pckeyboard.AutoSummaryListPreference
+            android:defaultValue=""
+            android:entries="@array/font_en_entries"
+            android:entryValues="@array/font_en_values"
+            android:key="pref_font_en"
+            android:persistent="true"
+            android:title="@string/title_font_en" />
+
+        <org.pocketworkstation.pckeyboard.SeekBarPreferenceString
+            android:defaultValue="1.0"
+            hk:minValue="0.5"
+            hk:maxValue="2.5"
+            hk:logScale="true"
+            hk:asPercent="true"
+            android:key="pref_font_scale"
+            android:persistent="true"
+            android:title="@string/title_font_scale" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

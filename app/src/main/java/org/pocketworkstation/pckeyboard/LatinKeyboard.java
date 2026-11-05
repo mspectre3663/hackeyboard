@@ -508,7 +508,9 @@ public class LatinKeyboard extends Keyboard {
             paint.setAntiAlias(true);
             paint.setTextAlign(Align.CENTER);
             if (isPersianKeyboard()) {
-                paint.setTypeface(FontUtils.getVazirTypeface(mContext));
+                paint.setTypeface(FontUtils.getPersianTypeface(mContext));
+            } else if (FontUtils.getEnglishTypeface(mContext) != null) {
+                paint.setTypeface(FontUtils.getEnglishTypeface(mContext));
             }
 
             final boolean allowVariableTextSize = true;
@@ -965,7 +967,9 @@ public class LatinKeyboard extends Keyboard {
                     mPrevLanguage = getLanguageName(languageSwitcher.getPrevInputLocale());
                 }
                 if (isPersianKeyboard() || FontUtils.containsPersian(mCurrentLanguage)) {
-                    paint.setTypeface(FontUtils.getVazirTypeface(mContext));
+                    paint.setTypeface(FontUtils.getPersianTypeface(mContext));
+                } else if (FontUtils.getEnglishTypeface(mContext) != null) {
+                    paint.setTypeface(FontUtils.getEnglishTypeface(mContext));
                 }
                 // Draw language text with shadow
                 final float baseline = mHeight * SPACEBAR_LANGUAGE_BASELINE - paint.descent();

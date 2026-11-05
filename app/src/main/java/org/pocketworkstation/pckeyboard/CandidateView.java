@@ -243,8 +243,10 @@ public class CandidateView extends View {
 
             boolean isPersian = (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale))
                     || FontUtils.containsPersian(suggestion);
-            Typeface normTypeface = isPersian ? FontUtils.getVazirTypeface(getContext()) : Typeface.DEFAULT;
-            Typeface boldTypeface = isPersian ? FontUtils.getVazirBoldTypeface(getContext()) : Typeface.DEFAULT_BOLD;
+            Typeface normTypeface = isPersian ? FontUtils.getPersianTypeface(getContext())
+                    : (FontUtils.getEnglishTypeface(getContext()) != null ? FontUtils.getEnglishTypeface(getContext()) : Typeface.DEFAULT);
+            Typeface boldTypeface = isPersian ? FontUtils.getPersianBoldTypeface(getContext())
+                    : (FontUtils.getEnglishBoldTypeface(getContext()) != null ? FontUtils.getEnglishBoldTypeface(getContext()) : Typeface.DEFAULT_BOLD);
 
             paint.setColor(mColorNormal);
             if (mHaveMinimalSuggestion 

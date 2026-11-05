@@ -54,8 +54,10 @@ public final class GlobalKeyboardSettings {
     public boolean capsLock = true;
     public boolean shiftLockModifiers = false;
     //
-    // Read by LatinKeyboardBaseView
     public float labelScalePref = 1.0f;
+    public String fontFa = "vazir.ttf";
+    public String fontEn = "";
+    public float fontScale = 1.0f;
     //
     // Read by CandidateView
     public float candidateScalePref = 1.0f;
@@ -159,6 +161,30 @@ public final class GlobalKeyboardSettings {
 
         addStringPref("pref_label_scale_v2", new StringPref() {
             public void set(String val) { labelScalePref = Float.valueOf(val); }
+            public String getDefault() { return "1.0"; }
+            public int getFlags() { return FLAG_PREF_RECREATE_INPUT_VIEW; }
+        });
+
+        addStringPref("pref_font_fa", new StringPref() {
+            public void set(String val) {
+                fontFa = val;
+                FontUtils.clearCache();
+            }
+            public String getDefault() { return "vazir.ttf"; }
+            public int getFlags() { return FLAG_PREF_RECREATE_INPUT_VIEW; }
+        });
+
+        addStringPref("pref_font_en", new StringPref() {
+            public void set(String val) {
+                fontEn = val;
+                FontUtils.clearCache();
+            }
+            public String getDefault() { return ""; }
+            public int getFlags() { return FLAG_PREF_RECREATE_INPUT_VIEW; }
+        });
+
+        addStringPref("pref_font_scale", new StringPref() {
+            public void set(String val) { fontScale = Float.valueOf(val); }
             public String getDefault() { return "1.0"; }
             public int getFlags() { return FLAG_PREF_RECREATE_INPUT_VIEW; }
         });

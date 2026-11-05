@@ -730,4 +730,129 @@
     <string name="notification_channel_name">Hacker\'s Keyboard</string>
     <string name="notification_channel_description">Hacker\'s Keyboard</string>
     <string name="notification_action_settings">Settings</string>
+    <!-- Font Settings -->
+    <string name="title_font_settings">Font Settings / تنظیمات فونت</string>
+    <string name="title_font_fa">Persian Font / فونت فارسی</string>
+    <string name="title_font_en">English Font / فونت انگلیسی</string>
+    <string name="title_font_scale">Font Size Scale / تغییر اندازه فونت</string>
+
+    <string-array name="font_fa_entries" translatable="false">
+        <item>وزیر (Vazir - پیش‌فرض)</item>
+        <item>آوینی (Aviny)</item>
+        <item>تیتر (B Titr)</item>
+        <item>سینما (Cinema)</item>
+        <item>دانا (Dana)</item>
+        <item>دانا مدیوم (Dana Medium)</item>
+        <item>دانا رگولار (Dana Regular)</item>
+        <item>فناوری (Fanavari)</item>
+        <item>فونت بولد (F Bold)</item>
+        <item>فونت رگولار (F Regular)</item>
+        <item>گرافیک عربی (Graphic Arabic)</item>
+        <item>هما (Homa)</item>
+        <item>ایران سنس (IRANSans)</item>
+        <item>ایران سنس ۱ (IR Sans 1)</item>
+        <item>ایران سنس ۲ (IR Sans 2)</item>
+        <item>جوان (Javan)</item>
+        <item>کلمه (Kalameh)</item>
+        <item>کوک (Kook)</item>
+        <item>لاله‌زار (Lalezar)</item>
+        <item>لوتوس (Lotoos)</item>
+        <item>مانلی (Maneli)</item>
+        <item>راوی (Ravi)</item>
+        <item>سرباز (Sarbaz)</item>
+        <item>اسنپ (Snapp)</item>
+        <item>یکان (Yekan)</item>
+    </string-array>
+
+    <string-array name="font_fa_values" translatable="false">
+        <item>vazir.ttf</item>
+        <item>aviny.ttf</item>
+        <item>btitr.ttf</item>
+        <item>cinema.ttf</item>
+        <item>dana.ttf</item>
+        <item>danam.ttf</item>
+        <item>danar.ttf</item>
+        <item>fanavari.ttf</item>
+        <item>fbold.ttf</item>
+        <item>fregular.ttf</item>
+        <item>graphicarabic.otf</item>
+        <item>homa.ttf</item>
+        <item>iransans.ttf</item>
+        <item>irsans1.ttf</item>
+        <item>irsans2.ttf</item>
+        <item>javan.ttf</item>
+        <item>kalame.ttf</item>
+        <item>kook.ttf</item>
+        <item>lalezar.ttf</item>
+        <item>lotoos.ttf</item>
+        <item>maneli.ttf</item>
+        <item>ravi.ttf</item>
+        <item>sarbaz.ttf</item>
+        <item>snapp.ttf</item>
+        <item>yekan.ttf</item>
+    </string-array>
+
+    <string-array name="font_en_entries" translatable="false">
+        <item>پیش‌فرض سیستم (System Default)</item>
+        <item>American Captain</item>
+        <item>Atwriter (Typewriter)</item>
+        <item>Avengeance Heroic Avenger Bold-Italic</item>
+        <item>Avengeance Mightiest Avenger</item>
+        <item>Captain Howdy</item>
+        <item>Chinese Rocks</item>
+        <item>Chineser</item>
+        <item>Corleone</item>
+        <item>Corleone Due</item>
+        <item>Dead Font Walking</item>
+        <item>FFF Business</item>
+        <item>FFF Business Bold Extended</item>
+        <item>FFF Calypso</item>
+        <item>Galactic Vanguardian</item>
+        <item>Heart Breaking Bad</item>
+        <item>Helvetica LT 95 Black</item>
+        <item>IRANSans Mobile Medium</item>
+        <item>Kalameh Black</item>
+        <item>Klavika Bold Italic</item>
+        <item>Lato Regular</item>
+        <item>Lato Medium</item>
+        <item>Metrolox</item>
+        <item>Mr. Robot</item>
+        <item>Pricedown (GTA)</item>
+        <item>The Godfather</item>
+        <item>Twilight New Moon</item>
+        <item>VTC Belials Blade</item>
+        <item>Watch Dogs</item>
+    </string-array>
+
+    <string-array name="font_en_values" translatable="false">
+        <item></item>
+        <item>American Captain.ttf</item>
+        <item>atwriter.ttf</item>
+        <item>AVENGEANCE HEROIC AVENGER BI.ttf</item>
+        <item>AVENGEANCE MIGHTIEST AVENGER.ttf</item>
+        <item>Captain Howdy.ttf</item>
+        <item>chinese rocks rg.otf</item>
+        <item>CHINESER.TTF</item>
+        <item>Corleone.ttf</item>
+        <item>CorleoneDue.ttf</item>
+        <item>Dead Font Walking.otf</item>
+        <item>FFF Business.ttf</item>
+        <item>FFF Business Bold Extended.ttf</item>
+        <item>FFF Calypso.ttf</item>
+        <item>GALACTIC VANGUARDIAN NCV.ttf</item>
+        <item>Heart Breaking Bad.otf</item>
+        <item>Helvetica LT 95 Black.ttf</item>
+        <item>IRANSansMobile_Medium.ttf</item>
+        <item>Kalameh Black.ttf</item>
+        <item>KlavikaBoldBoldItalicOSF1.otf</item>
+        <item>Lato-Regular.ttf</item>
+        <item>Lato-Medium.ttf</item>
+        <item>METROLOX.ttf</item>
+        <item>MrRobot.otf</item>
+        <item>pricedow.ttf</item>
+        <item>TheGodFather.ttf</item>
+        <item>twilight New Moon.ttf</item>
+        <item>VTCBelialsBlade.ttf</item>
+        <item>watchdogs.ttf</item>
+    </string-array>
 </resources>
