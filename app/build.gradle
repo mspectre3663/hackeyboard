@@ -45,6 +45,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    sourceSets {
+        main {
+            res.srcDirs = ["${project.layout.buildDirectory.get().asFile}/generated/filtered_res"]
+        }
+    }
 }
 
 dependencies {
@@ -53,6 +59,14 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.core:core:1.15.0'
     testImplementation 'junit:junit:4.13.2'
+}
+
+tasks.register('prepareFilteredResources', Sync) {
+    from('src/main/res') {
+        exclude 'fontFA/**'
+        exclude 'fontEN/**'
+    }
+    into("${project.layout.buildDirectory.get().asFile}/generated/filtered_res")
 }
 
 tasks.register('syncCustomFonts', Copy) {
@@ -65,4 +79,11 @@ tasks.register('syncCustomFonts', Copy) {
     into('src/main/assets')
 }
 
+tasks.matching { it.name.startsWith('generate') && it.name.endsWith('Resources') }.configureEach {
+    dependsOn prepareFilteredResources
+}
+tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Resources') }.configureEach {
+    dependsOn prepareFilteredResources
+}
+preBuild.dependsOn prepareFilteredResources
 preBuild.dependsOn syncCustomFonts

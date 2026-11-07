@@ -1447,7 +1447,7 @@ public class LatinIME extends InputMethodService implements
     }
 
     private boolean isAlphabet(int code) {
-        if (Character.isLetter(code)) {
+        if (Character.isLetter(code) || code == 0x200C || code == '\'' || code == 0x2019) {
             return true;
         } else {
             return false;

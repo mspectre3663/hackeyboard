@@ -112,6 +112,10 @@ abstract public class Dictionary {
         return true;
     }
 
+    public int getSize() {
+        return 0;
+    }
+
     /**
      * Override to clean up any resources.
      */

@@ -67,7 +67,7 @@ public class Suggest implements Dictionary.WordCallback {
 
     static final int LARGE_DICTIONARY_THRESHOLD = 200 * 1000;
 
-    private BinaryDictionary mMainDict;
+    private Dictionary mMainDict;
 
     private Dictionary mUserDictionary;
 
@@ -106,20 +106,12 @@ public class Suggest implements Dictionary.WordCallback {
     private int mCorrectionMode = CORRECTION_BASIC;
 
     public Suggest(Context context, int[] dictionaryResId) {
-        mMainDict = new BinaryDictionary(context, dictionaryResId, DIC_MAIN);
-        if (!hasMainDictionary()) {
-            Locale locale = context.getResources().getConfiguration().locale;
-            BinaryDictionary plug = PluginManager.getDictionary(context, locale.getLanguage());
-            if (plug != null) {
-                mMainDict.close();
-                mMainDict = plug;
-            }
-        }
+        mMainDict = new FastDictionary(context);
         initPool();
     }
 
     public Suggest(Context context, ByteBuffer byteBuffer) {
-        mMainDict = new BinaryDictionary(context, byteBuffer, DIC_MAIN);
+        mMainDict = new FastDictionary(context);
         initPool();
     }
 
@@ -143,7 +135,7 @@ public class Suggest implements Dictionary.WordCallback {
     }
 
     public boolean hasMainDictionary() {
-        return mMainDict.getSize() > LARGE_DICTIONARY_THRESHOLD;
+        return mMainDict != null && mMainDict.getSize() > 0;
     }
 
     public int getApproxMaxWordLength() {
@@ -255,7 +247,7 @@ public class Suggest implements Dictionary.WordCallback {
 
             if (!TextUtils.isEmpty(prevWordForBigram)) {
                 CharSequence lowerPrevWord = prevWordForBigram.toString().toLowerCase();
-                if (mMainDict.isValidWord(lowerPrevWord)) {
+                if (mMainDict != null && mMainDict.isValidWord(lowerPrevWord)) {
                     prevWordForBigram = lowerPrevWord;
                 }
                 if (mUserBigramDictionary != null) {
@@ -288,6 +280,9 @@ public class Suggest implements Dictionary.WordCallback {
                     }
                 }
             }
+            if (mMainDict != null) {
+                mMainDict.getWords(wordComposer, this, mNextLettersFrequencies);
+            }
 
         } else if (wordComposer.size() > 1) {
             // At second character typed, search the unigrams (scores being affected by bigrams)
@@ -305,7 +300,9 @@ public class Suggest implements Dictionary.WordCallback {
                     mHaveCorrection = true;
                 }
             }
-            mMainDict.getWords(wordComposer, this, mNextLettersFrequencies);
+            if (mMainDict != null) {
+                mMainDict.getWords(wordComposer, this, mNextLettersFrequencies);
+            }
             if ((mCorrectionMode == CORRECTION_FULL || mCorrectionMode == CORRECTION_FULL_BIGRAM)
                     && mSuggestions.size() > 0) {
                 mHaveCorrection = true;
@@ -507,7 +504,7 @@ public class Suggest implements Dictionary.WordCallback {
         if (word == null || word.length() == 0) {
             return false;
         }
-        return mMainDict.isValidWord(word)
+        return (mMainDict != null && mMainDict.isValidWord(word))
                 || (mUserDictionary != null && mUserDictionary.isValidWord(word))
                 || (mAutoDictionary != null && mAutoDictionary.isValidWord(word))
                 || (mContactsDictionary != null && mContactsDictionary.isValidWord(word));
