@@ -153,6 +153,7 @@ public class LatinIME extends InputMethodService implements
     private static final int POS_SETTINGS = 1;
 
     // private LatinKeyboardView mInputView;
+    private LinearLayout mInputContainer;
     private LinearLayout mCandidateViewContainer;
     private CandidateView mCandidateView;
     private Suggest mSuggest;
@@ -548,7 +549,8 @@ public class LatinIME extends InputMethodService implements
     private boolean suggestionsDisabled() {
         if (mSuggestionForceOff) return true;
         if (mSuggestionForceOn) return false;
-        return !(mSuggestionsInLandscape || isPortrait());
+        if (!mShowSuggestions) return true;
+        return false;
     }
 
     /**
@@ -694,14 +696,62 @@ public class LatinIME extends InputMethodService implements
         mConfigurationChanging = false;
     }
 
+    private void initInputContainer() {
+        if (mInputContainer == null) {
+            mInputContainer = new LinearLayout(this);
+            mInputContainer.setOrientation(LinearLayout.VERTICAL);
+            mInputContainer.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
+        if (mCandidateViewContainer == null) {
+            mCandidateViewContainer = (LinearLayout) getLayoutInflater().inflate(
+                    R.layout.candidates, null);
+            mCandidateView = (CandidateView) mCandidateViewContainer.findViewById(R.id.candidates);
+            mCandidateView.setPadding(0, 0, 0, 0);
+            mCandidateView.setService(this);
+        }
+    }
+
+    public void updateInputViewWithContainer() {
+        initInputContainer();
+        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+
+        if (mCandidateViewContainer != null && mCandidateViewContainer.getParent() instanceof ViewGroup) {
+            ((ViewGroup) mCandidateViewContainer.getParent()).removeView(mCandidateViewContainer);
+        }
+
+        if (inputView != null && inputView.getParent() instanceof ViewGroup) {
+            ((ViewGroup) inputView.getParent()).removeView(inputView);
+        }
+
+        mInputContainer.removeAllViews();
+
+        int stripHeight = getResources().getDimensionPixelSize(R.dimen.candidate_strip_height);
+        LinearLayout.LayoutParams candidateLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, stripHeight);
+        mInputContainer.addView(mCandidateViewContainer, candidateLp);
+
+        if (inputView != null) {
+            LinearLayout.LayoutParams kbdLp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            mInputContainer.addView(inputView, kbdLp);
+        }
+
+        updateCandidateVisibility();
+        setInputView(mInputContainer);
+    }
+
     @Override
     public View onCreateInputView() {
-        setCandidatesViewShown(false);  // Workaround for "already has a parent" when reconfiguring
+        initInputContainer();
         mKeyboardSwitcher.recreateInputView();
         mKeyboardSwitcher.makeKeyboards(true);
         mKeyboardSwitcher.setKeyboardMode(KeyboardSwitcher.MODE_TEXT, 0,
                 shouldShowVoiceButton(getCurrentInputEditorInfo()));
-        return mKeyboardSwitcher.getInputView();
+        updateInputViewWithContainer();
+        return mInputContainer;
     }
 
     @Override
@@ -723,30 +773,12 @@ public class LatinIME extends InputMethodService implements
     
     @Override
     public View onCreateCandidatesView() {
-        //Log.i(TAG, "onCreateCandidatesView(), mCandidateViewContainer=" + mCandidateViewContainer);
-        //mKeyboardSwitcher.makeKeyboards(true);
-        if (mCandidateViewContainer == null) {
-            mCandidateViewContainer = (LinearLayout) getLayoutInflater().inflate(
-                    R.layout.candidates, null);
-            mCandidateView = (CandidateView) mCandidateViewContainer
-            .findViewById(R.id.candidates);
-            mCandidateView.setPadding(0, 0, 0, 0);
-            mCandidateView.setService(this);
-            setCandidatesView(mCandidateViewContainer);
-        }
-        return mCandidateViewContainer;
+        return null;
     }
 
     private void removeCandidateViewContainer() {
-        //Log.i(TAG, "removeCandidateViewContainer(), mCandidateViewContainer=" + mCandidateViewContainer);
-        if (mCandidateViewContainer != null) {
-            mCandidateViewContainer.removeAllViews();
-            ViewParent parent = mCandidateViewContainer.getParent();
-            if (parent != null && parent instanceof ViewGroup) {
-                ((ViewGroup) parent).removeView(mCandidateViewContainer);
-            }
-            mCandidateViewContainer = null;
-            mCandidateView = null;
+        if (mCandidateView != null) {
+            mCandidateView.clear();
         }
         resetPrediction();
     }
@@ -1113,42 +1145,23 @@ public class LatinIME extends InputMethodService implements
         }
     }
 
+    public void updateCandidateVisibility() {
+        if (mCandidateViewContainer != null) {
+            boolean visible = isCandidateStripVisible();
+            mCandidateViewContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
     private void setCandidatesViewShownInternal(boolean shown,
             boolean needsInputViewShown) {
-//        Log.i(TAG, "setCandidatesViewShownInternal(" + shown + ", " + needsInputViewShown +
-//                " mCompletionOn=" + mCompletionOn +
-//                " mPredictionOnForMode=" + mPredictionOnForMode +
-//                " mPredictionOnPref=" + mPredictionOnPref +
-//                " mPredicting=" + mPredicting
-//                );
-        // TODO: Remove this if we support candidates with hard keyboard
-        boolean visible = shown
-        && onEvaluateInputViewShown()
-        && mKeyboardSwitcher.getInputView() != null
-        && isPredictionOn()
-        && (needsInputViewShown
-                ? mKeyboardSwitcher.getInputView().isShown()
-                        : true);
-        if (visible) {
-            if (mCandidateViewContainer == null) {
-                onCreateCandidatesView();
-                setNextSuggestions();
-            }
-        } else {
-            if (mCandidateViewContainer != null) {
-                removeCandidateViewContainer();
-                commitTyped(getCurrentInputConnection(), true);
-            }
-        }
-        super.setCandidatesViewShown(visible);
+        updateCandidateVisibility();
     }
 
     @Override
     public void onFinishCandidatesView(boolean finishingInput) {
-        //Log.i(TAG, "onFinishCandidatesView(), mCandidateViewContainer=" + mCandidateViewContainer);
         super.onFinishCandidatesView(finishingInput);
-        if (mCandidateViewContainer != null) {
-            removeCandidateViewContainer();
+        if (mCandidateView != null) {
+            mCandidateView.clear();
         }
     }
 
@@ -1162,7 +1175,7 @@ public class LatinIME extends InputMethodService implements
     
     @Override
     public void setCandidatesViewShown(boolean shown) {
-        setCandidatesViewShownInternal(shown, true /* needsInputViewShown */);
+        updateCandidateVisibility();
     }
 
     @Override
@@ -2450,11 +2463,14 @@ public class LatinIME extends InputMethodService implements
     }
 
     private boolean isPredictionOn() {
-        return mPredictionOnForMode && isPredictionWanted();
+        if (mPasswordText) return false;
+        if (mSuggestionForceOff) return false;
+        if (mSuggestionForceOn) return true;
+        return mShowSuggestions;
     }
 
     private boolean isPredictionWanted() {
-        return (mShowSuggestions || mSuggestionForceOn) && !suggestionsDisabled();
+        return isPredictionOn();
     }
 
     private boolean isCandidateStripVisible() {
@@ -2464,14 +2480,7 @@ public class LatinIME extends InputMethodService implements
     private void switchToKeyboardView() {
         mHandler.post(new Runnable() {
             public void run() {
-                LatinKeyboardView view = mKeyboardSwitcher.getInputView(); 
-                if (view != null) {
-                    ViewParent p = view.getParent();
-                    if (p != null && p instanceof ViewGroup) {
-                        ((ViewGroup) p).removeView(view);
-                    }
-                    setInputView(mKeyboardSwitcher.getInputView());
-                }
+                updateInputViewWithContainer();
                 setCandidatesViewShown(true);
                 updateInputViewShown();
                 postUpdateSuggestions();
