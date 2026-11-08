@@ -32,6 +32,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.Manifest;
+import android.widget.Toast;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -287,6 +290,10 @@ public class LatinIME extends InputMethodService implements
     private NotificationReceiver mNotificationReceiver;
 
     private VoiceRecognitionTrigger mVoiceRecognitionTrigger;
+    private EmojiKeyboardView mEmojiKeyboardView;
+    private VoiceInputView mVoiceInputView;
+    private boolean mIsShowingEmoji = false;
+    private boolean mIsShowingVoice = false;
 
     public abstract static class WordAlternatives {
         protected CharSequence mChosenWord;
@@ -613,6 +620,12 @@ public class LatinIME extends InputMethodService implements
 
         int[] dictionaries = getDictionary(orig);
         mSuggest = new Suggest(this, dictionaries);
+        try {
+            int maxSugg = Integer.parseInt(sp.getString("pref_max_suggestions", "5"));
+            mSuggest.setMaxSuggestions(maxSugg);
+        } catch (Exception e) {
+            mSuggest.setMaxSuggestions(5);
+        }
         updateAutoTextEnabled(saveLocale);
         if (mUserDictionary != null)
             mUserDictionary.close();
@@ -737,10 +750,173 @@ public class LatinIME extends InputMethodService implements
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             mInputContainer.addView(inputView, kbdLp);
+
+            initEmojiAndVoiceViews();
+            if (mEmojiKeyboardView != null) {
+                if (mEmojiKeyboardView.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
+                }
+                mInputContainer.addView(mEmojiKeyboardView, kbdLp);
+            }
+            if (mVoiceInputView != null) {
+                if (mVoiceInputView.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) mVoiceInputView.getParent()).removeView(mVoiceInputView);
+                }
+                mInputContainer.addView(mVoiceInputView, kbdLp);
+            }
         }
 
         updateCandidateVisibility();
         setInputView(mInputContainer);
+    }
+
+    private void initEmojiAndVoiceViews() {
+        if (mEmojiKeyboardView == null) {
+            mEmojiKeyboardView = new EmojiKeyboardView(this);
+            mEmojiKeyboardView.setVisibility(View.GONE);
+            mEmojiKeyboardView.setListener(new EmojiKeyboardView.EmojiEventListener() {
+                @Override
+                public void onEmojiSelected(String emoji) {
+                    InputConnection ic = getCurrentInputConnection();
+                    if (ic != null) {
+                        ic.commitText(emoji, 1);
+                    }
+                }
+
+                @Override
+                public void onBackToKeyboard() {
+                    hideEmojiKeyboard();
+                }
+
+                @Override
+                public void onBackspace() {
+                    sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
+                }
+
+                @Override
+                public void onSpace() {
+                    sendKeyChar(' ');
+                }
+            });
+        }
+
+        if (mVoiceInputView == null) {
+            mVoiceInputView = new VoiceInputView(this);
+            mVoiceInputView.setVisibility(View.GONE);
+            mVoiceInputView.setListener(new VoiceInputView.VoiceInputListener() {
+                @Override
+                public void onVoiceTextRecognized(String text) {
+                    commitVoiceText(text);
+                    hideVoiceInput();
+                }
+
+                @Override
+                public void onVoiceInputCancelled() {
+                    hideVoiceInput();
+                }
+            });
+        }
+    }
+
+    public void showEmojiKeyboard() {
+        if (mEmojiKeyboardView == null || mKeyboardSwitcher == null) return;
+        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+        if (inputView != null) {
+            int h = inputView.getHeight();
+            if (h > 0) {
+                ViewGroup.LayoutParams lp = mEmojiKeyboardView.getLayoutParams();
+                if (lp != null) {
+                    lp.height = h;
+                    mEmojiKeyboardView.setLayoutParams(lp);
+                }
+            }
+            inputView.setVisibility(View.GONE);
+        }
+        if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+        mEmojiKeyboardView.setVisibility(View.VISIBLE);
+        mIsShowingEmoji = true;
+        mIsShowingVoice = false;
+    }
+
+    public void hideEmojiKeyboard() {
+        if (mEmojiKeyboardView == null) return;
+        mEmojiKeyboardView.setVisibility(View.GONE);
+        if (mKeyboardSwitcher != null) {
+            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+            if (inputView != null) {
+                inputView.setVisibility(View.VISIBLE);
+            }
+        }
+        mIsShowingEmoji = false;
+    }
+
+    public void showVoiceInput() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                VoicePermissionActivity.setCallback(new VoicePermissionActivity.PermissionCallback() {
+                    @Override
+                    public void onPermissionResult(boolean granted) {
+                        if (granted) {
+                            showVoiceInputInternal();
+                        } else {
+                            Toast.makeText(LatinIME.this, R.string.voice_permission_prompt, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                Intent intent = new Intent(this, VoicePermissionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                return;
+            }
+        }
+        showVoiceInputInternal();
+    }
+
+    private void showVoiceInputInternal() {
+        if (mVoiceInputView == null || mKeyboardSwitcher == null) return;
+        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+        if (inputView != null) {
+            int h = inputView.getHeight();
+            if (h > 0) {
+                ViewGroup.LayoutParams lp = mVoiceInputView.getLayoutParams();
+                if (lp != null) {
+                    lp.height = h;
+                    mVoiceInputView.setLayoutParams(lp);
+                }
+            }
+            inputView.setVisibility(View.GONE);
+        }
+        if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
+        boolean isPersian = (mInputLocale != null && mInputLocale.startsWith("fa"))
+                || (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale));
+        mVoiceInputView.setInitialLanguage(isPersian);
+        mVoiceInputView.setVisibility(View.VISIBLE);
+        mVoiceInputView.startListening();
+        mIsShowingVoice = true;
+        mIsShowingEmoji = false;
+    }
+
+    public void hideVoiceInput() {
+        if (mVoiceInputView == null) return;
+        mVoiceInputView.cancelListening();
+        mVoiceInputView.setVisibility(View.GONE);
+        if (mKeyboardSwitcher != null) {
+            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+            if (inputView != null) {
+                inputView.setVisibility(View.VISIBLE);
+            }
+        }
+        mIsShowingVoice = false;
+    }
+
+    public void commitVoiceText(String text) {
+        if (text == null || text.trim().isEmpty()) return;
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null) {
+            ic.beginBatchEdit();
+            ic.commitText(text.trim() + " ", 1);
+            ic.endBatchEdit();
+        }
     }
 
     @Override
@@ -995,6 +1171,8 @@ public class LatinIME extends InputMethodService implements
     @Override
     public void onFinishInputView(boolean finishingInput) {
         super.onFinishInputView(finishingInput);
+        hideEmojiKeyboard();
+        hideVoiceInput();
         // Remove penging messages related to update suggestions
         mHandler.removeMessages(MSG_UPDATE_SUGGESTIONS);
         mHandler.removeMessages(MSG_UPDATE_OLD_SUGGESTIONS);
@@ -1211,6 +1389,14 @@ public class LatinIME extends InputMethodService implements
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
+            if (mIsShowingVoice) {
+                hideVoiceInput();
+                return true;
+            }
+            if (mIsShowingEmoji) {
+                hideEmojiKeyboard();
+                return true;
+            }
             if (event.getRepeatCount() == 0
                     && mKeyboardSwitcher.getInputView() != null) {
                 if (mKeyboardSwitcher.getInputView().handleBack()) {
@@ -2004,10 +2190,14 @@ public class LatinIME extends InputMethodService implements
             }
             break;
         case LatinKeyboardView.KEYCODE_OPTIONS:
-            onOptionKeyPressed();
+            if (mIsShowingEmoji) {
+                hideEmojiKeyboard();
+            } else {
+                showEmojiKeyboard();
+            }
             break;
         case LatinKeyboardView.KEYCODE_OPTIONS_LONGPRESS:
-            onOptionKeyLongPressed();
+            onOptionKeyPressed();
             break;
         case LatinKeyboardView.KEYCODE_COMPOSE:
             mComposeMode = !mComposeMode;
@@ -2020,10 +2210,11 @@ public class LatinIME extends InputMethodService implements
             toggleLanguage(false, false);
             break;
         case LatinKeyboardView.KEYCODE_VOICE:
-            if (mVoiceRecognitionTrigger.isInstalled()) {
-                mVoiceRecognitionTrigger.startVoiceRecognition();
+            if (mIsShowingVoice) {
+                hideVoiceInput();
+            } else {
+                showVoiceInput();
             }
-            //startListening(false /* was a button press, was not a swipe */);
             break;
         case 9 /* Tab */:
             if (processMultiKey(primaryCode)) {
@@ -3012,6 +3203,8 @@ public class LatinIME extends InputMethodService implements
             mSuggestionForceOff = false;
             mSuggestionForceOn = false;
             needReload = true;
+        } else if ("pref_max_suggestions".equals(key)) {
+            loadSettings();
         } else if (PREF_HEIGHT_PORTRAIT.equals(key)) {
             mHeightPortrait = getHeight(sharedPreferences,
                     PREF_HEIGHT_PORTRAIT, res.getString(R.string.default_height_portrait));
@@ -3400,6 +3593,15 @@ public class LatinIME extends InputMethodService implements
 
         mShowSuggestions = sp.getBoolean(PREF_SHOW_SUGGESTIONS, mResources
                 .getBoolean(R.bool.default_suggestions));
+
+        if (mSuggest != null) {
+            try {
+                int maxSugg = Integer.parseInt(sp.getString("pref_max_suggestions", "5"));
+                mSuggest.setMaxSuggestions(maxSugg);
+            } catch (Exception e) {
+                mSuggest.setMaxSuggestions(5);
+            }
+        }
 
         final String voiceMode = sp.getString(PREF_VOICE_MODE,
                 getString(R.string.voice_mode_main));

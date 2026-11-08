@@ -253,6 +253,16 @@
             android:dependency="show_suggestions"
             />
 
+        <org.pocketworkstation.pckeyboard.AutoSummaryListPreference
+            android:key="pref_max_suggestions"
+            android:title="@string/title_max_suggestions"
+            android:persistent="true"
+            android:entries="@array/max_suggestions_entries"
+            android:entryValues="@array/max_suggestions_values"
+            android:defaultValue="5"
+            android:dependency="show_suggestions"
+            />
+
         <org.pocketworkstation.pckeyboard.AutoSummaryEditTextPreference
             android:key="pref_suggested_punctuation"
             android:title="@string/title_suggested_punctuation"

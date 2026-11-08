@@ -855,4 +855,30 @@
         <item>VTCBelialsBlade.ttf</item>
         <item>watchdogs.ttf</item>
     </string-array>
+
+    <string name="title_max_suggestions">Number of suggestions</string>
+    <string-array name="max_suggestions_entries">
+        <item>3</item>
+        <item>4</item>
+        <item>5 (Default)</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>10</item>
+    </string-array>
+    <string-array name="max_suggestions_values">
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>10</item>
+    </string-array>
+
+    <string name="voice_listening_active">Listening...</string>
+    <string name="voice_tap_to_speak_prompt">Tap mic to speak</string>
+    <string name="voice_lang_persian">FA</string>
+    <string name="voice_lang_english">EN</string>
+    <string name="voice_permission_prompt">Audio recording permission is required for voice typing.</string>
 </resources>

@@ -44,7 +44,7 @@ public class FastDictionary extends Dictionary {
     private final LangDict mDictFa = new LangDict();
 
     private final Context mContext;
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService mExecutor = Executors.newFixedThreadPool(2);
 
     public FastDictionary(Context context) {
         mContext = context.getApplicationContext();
@@ -56,6 +56,11 @@ public class FastDictionary extends Dictionary {
             @Override
             public void run() {
                 loadLanguage(FILE_FA, mDictFa, true);
+            }
+        });
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
                 loadLanguage(FILE_EN, mDictEn, false);
             }
         });

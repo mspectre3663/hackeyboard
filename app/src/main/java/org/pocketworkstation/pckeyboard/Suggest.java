@@ -239,9 +239,7 @@ public class Suggest implements Dictionary.WordCallback {
             mLowerOriginalWord = "";
         }
 
-        if (wordComposer.size() == 1 && (mCorrectionMode == CORRECTION_FULL_BIGRAM
-                || mCorrectionMode == CORRECTION_BASIC)) {
-            // At first character typed, search only the bigrams
+        if (wordComposer.size() == 1) {
             Arrays.fill(mBigramPriorities, 0);
             collectGarbage(mBigramSuggestions, PREF_MAX_BIGRAMS);
 
@@ -280,8 +278,14 @@ public class Suggest implements Dictionary.WordCallback {
                     }
                 }
             }
+            if (mUserDictionary != null) {
+                mUserDictionary.getWords(wordComposer, this, mNextLettersFrequencies);
+            }
             if (mMainDict != null) {
                 mMainDict.getWords(wordComposer, this, mNextLettersFrequencies);
+            }
+            if (mSuggestions.size() > 0) {
+                mHaveCorrection = true;
             }
 
         } else if (wordComposer.size() > 1) {
@@ -309,7 +313,19 @@ public class Suggest implements Dictionary.WordCallback {
             }
         }
         if (mOriginalWord != null) {
-            mSuggestions.add(0, mOriginalWord.toString());
+            boolean alreadyContains = false;
+            for (CharSequence cs : mSuggestions) {
+                if (TextUtils.equals(cs, mOriginalWord)) {
+                    alreadyContains = true;
+                    break;
+                }
+            }
+            if (!alreadyContains) {
+                mSuggestions.add(0, mOriginalWord.toString());
+            }
+        }
+        while (mSuggestions.size() > mPrefMaxSuggestions) {
+            mSuggestions.remove(mSuggestions.size() - 1);
         }
 
         // Check if the first suggestion has a minimum number of characters in common

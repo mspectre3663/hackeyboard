@@ -55,6 +55,8 @@ public class LatinKeyboard extends Keyboard {
     private Drawable mMicPreviewIcon;
     private Drawable mSettingsIcon;
     private Drawable mSettingsPreviewIcon;
+    private Drawable mEmojiIcon;
+    private Drawable mEmojiPreviewIcon;
     private Drawable m123MicIcon;
     private Drawable m123MicPreviewIcon;
     private final Drawable mButtonArrowLeftIcon;
@@ -136,6 +138,9 @@ public class LatinKeyboard extends Keyboard {
         mMicPreviewIcon = res.getDrawable(R.drawable.sym_keyboard_feedback_mic);
         mSettingsIcon = res.getDrawable(R.drawable.sym_keyboard_settings);
         mSettingsPreviewIcon = res.getDrawable(R.drawable.sym_keyboard_feedback_settings);
+        mEmojiIcon = res.getDrawable(R.drawable.sym_keyboard_emoji);
+        mEmojiPreviewIcon = res.getDrawable(R.drawable.sym_keyboard_feedback_emoji);
+        setDefaultBounds(mEmojiPreviewIcon);
         setDefaultBounds(mMicPreviewIcon);
         mButtonArrowLeftIcon = res.getDrawable(R.drawable.sym_keyboard_language_arrows_left);
         mButtonArrowRightIcon = res.getDrawable(R.drawable.sym_keyboard_language_arrows_right);
@@ -172,6 +177,11 @@ public class LatinKeyboard extends Keyboard {
         case KEYCODE_MODE_CHANGE:
             m123Key = key;
             m123Label = key.label;
+            break;
+        case LatinKeyboardView.KEYCODE_OPTIONS:
+            key.icon = mEmojiIcon;
+            key.iconPreview = mEmojiPreviewIcon;
+            key.label = null;
             break;
         }
 
@@ -361,10 +371,10 @@ public class LatinKeyboard extends Keyboard {
         final Drawable settingsHintDrawable = new BitmapDrawable(mRes,
                 drawSynthesizedSettingsHintImage(key.width, key.height, mSettingsIcon, mHintIcon));
     	key.label = null;
-    	key.icon = settingsHintDrawable;
+    	key.icon = mEmojiIcon;
     	key.codes = new int[] { LatinKeyboardView.KEYCODE_OPTIONS };
     	key.popupResId = R.xml.popup_mic;
-    	key.iconPreview = mSettingsPreviewIcon;
+    	key.iconPreview = mEmojiPreviewIcon;
     }
     
     private void setNonMicF1Key(Key key, String label, int popupResId) {

@@ -136,5 +136,10 @@
     <string name="prefs_enable_recorrection_summary" msgid="1056068922330206170">"برای تصحیح کلمات وارد شده آنها را لمس کنید"</string>
     <string name="keyboard_layout" msgid="437433231038683666">"طرح زمینه صفحه کلید"</string>
     <string name="subtype_mode_keyboard" msgid="2242090416595003881">"صفحه کلید"</string>
-    <string name="subtype_mode_voice" msgid="4394113125441627771">"صوتی"</string>
+    <string name="title_max_suggestions">تعداد ساجست‌ها</string>
+    <string name="voice_listening_active">در حال شنیدن...</string>
+    <string name="voice_tap_to_speak_prompt">برای صحبت لمس کنید</string>
+    <string name="voice_lang_persian">فارسی</string>
+    <string name="voice_lang_english">انگلیسی</string>
+    <string name="voice_permission_prompt">برای تایپ صوتی، دسترسی ضبط صدا لازم است.</string>
 </resources>
