@@ -30,7 +30,6 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
     private VoiceParticleRippleView mRippleView;
     private TextView mStatusText;
     private TextView mLanguageToggle;
-    private TextView mMicButton;
     private View mCloseBtn;
     private View mDoneBtn;
 
@@ -132,20 +131,12 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
 
         overlay.addView(topBar, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        // Center Area: Large Mic Tap Target
+        // Center Area: Clean, transparent area showing purely the 2-color particle wave
         FrameLayout centerArea = new FrameLayout(context);
         LinearLayout.LayoutParams centerLp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1.0f);
         centerArea.setLayoutParams(centerLp);
-
-        mMicButton = new TextView(context);
-        mMicButton.setText("🎤");
-        mMicButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 36);
-        mMicButton.setGravity(Gravity.CENTER);
-        mMicButton.setBackgroundColor(Color.parseColor("#1F2025"));
-        FrameLayout.LayoutParams micLp = new FrameLayout.LayoutParams(dpToPx(68), dpToPx(68), Gravity.CENTER);
-        mMicButton.setLayoutParams(micLp);
-        mMicButton.setClickable(true);
-        mMicButton.setOnClickListener(new OnClickListener() {
+        centerArea.setClickable(true);
+        centerArea.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mIsListening) {
@@ -155,7 +146,6 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
                 }
             }
         });
-        centerArea.addView(mMicButton);
         overlay.addView(centerArea);
 
         // Bottom Done / Submit button
@@ -202,7 +192,6 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
         mLastRecognizedText = "";
         mRippleView.resetEnergy();
         mStatusText.setText("fa-IR".equals(mCurrentLanguage) ? "در حال شنیدن..." : "Listening...");
-        mMicButton.setBackgroundColor(Color.parseColor("#333540"));
 
         try {
             if (mSpeechRecognizer != null) {
@@ -243,7 +232,6 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
             } catch (Throwable ignored) {}
         }
         mIsListening = false;
-        mMicButton.setBackgroundColor(Color.parseColor("#1F2025"));
         mRippleView.resetEnergy();
 
         if (mLastRecognizedText != null && !mLastRecognizedText.trim().isEmpty()) {
@@ -263,7 +251,6 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
             mSpeechRecognizer = null;
         }
         mRippleView.resetEnergy();
-        mMicButton.setBackgroundColor(Color.parseColor("#1F2025"));
     }
 
     // RecognitionListener Callbacks
@@ -296,7 +283,6 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
     public void onError(int error) {
         mIsListening = false;
         mRippleView.resetEnergy();
-        mMicButton.setBackgroundColor(Color.parseColor("#1F2025"));
 
         String msg;
         switch (error) {
@@ -322,7 +308,6 @@ public class VoiceInputView extends FrameLayout implements RecognitionListener {
     public void onResults(Bundle results) {
         mIsListening = false;
         mRippleView.resetEnergy();
-        mMicButton.setBackgroundColor(Color.parseColor("#1F2025"));
 
         ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         if (matches != null && !matches.isEmpty()) {

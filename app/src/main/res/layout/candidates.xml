@@ -28,11 +28,22 @@
 
     <org.pocketworkstation.pckeyboard.CandidateView
         android:id="@+id/candidates"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="@dimen/candidate_strip_height"
         android:layout_weight="1"
         android:fadingEdge="horizontal"
         android:fadingEdgeLength="@dimen/candidate_strip_fading_edge_length"
         />
-        
+
+    <ImageView
+        android:id="@+id/btn_clipboard"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:padding="8dp"
+        android:contentDescription="@string/title_clipboard"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@drawable/ic_clipboard_strip"
+        />
+
 </LinearLayout>

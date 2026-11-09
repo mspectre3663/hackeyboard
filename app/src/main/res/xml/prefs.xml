@@ -271,6 +271,29 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="@string/title_clipboard_category"
+            android:key="clipboard_settings">
+
+        <CheckBoxPreference
+            android:key="pref_clipboard_enabled"
+            android:title="@string/pref_clipboard_enabled_title"
+            android:summary="@string/pref_clipboard_enabled_summary"
+            android:persistent="true"
+            android:defaultValue="true"
+            />
+
+        <org.pocketworkstation.pckeyboard.AutoSummaryListPreference
+            android:key="pref_clipboard_history_size"
+            android:title="@string/pref_clipboard_size_title"
+            android:persistent="true"
+            android:entries="@array/clipboard_size_entries"
+            android:entryValues="@array/clipboard_size_values"
+            android:defaultValue="50"
+            android:dependency="pref_clipboard_enabled"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/title_input_mode_settings"
             android:key="graphics_settings">
 

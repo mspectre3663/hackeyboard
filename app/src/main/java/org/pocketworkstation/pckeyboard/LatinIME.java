@@ -27,6 +27,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -292,8 +294,11 @@ public class LatinIME extends InputMethodService implements
     private VoiceRecognitionTrigger mVoiceRecognitionTrigger;
     private EmojiKeyboardView mEmojiKeyboardView;
     private VoiceInputView mVoiceInputView;
+    private ClipboardNotepadView mClipboardNotepadView;
     private boolean mIsShowingEmoji = false;
     private boolean mIsShowingVoice = false;
+    private boolean mIsShowingClipboard = false;
+    private ClipboardManager.OnPrimaryClipChangedListener mClipChangedListener;
 
     public abstract static class WordAlternatives {
         protected CharSequence mChosenWord;
@@ -442,6 +447,43 @@ public class LatinIME extends InputMethodService implements
         registerReceiver(mReceiver, filter);
         prefs.registerOnSharedPreferenceChangeListener(this);
         setNotification(mKeyboardNotification);
+        initClipboardListener();
+    }
+
+    private void initClipboardListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            try {
+                final ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (cm != null) {
+                    mClipChangedListener = new ClipboardManager.OnPrimaryClipChangedListener() {
+                        @Override
+                        public void onPrimaryClipChanged() {
+                            if (!ClipboardHelper.isClipboardEnabled(LatinIME.this)) return;
+                            try {
+                                ClipData clip = cm.getPrimaryClip();
+                                if (clip != null && clip.getItemCount() > 0) {
+                                    CharSequence text = clip.getItemAt(0).coerceToText(LatinIME.this);
+                                    if (text != null) {
+                                        String str = text.toString().trim();
+                                        if (!str.isEmpty()) {
+                                            ClipboardHelper.addClip(LatinIME.this, str);
+                                            if (mClipboardNotepadView != null && mIsShowingClipboard) {
+                                                mClipboardNotepadView.refreshClipboardList();
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (Throwable t) {
+                                // Ignore
+                            }
+                        }
+                    };
+                    cm.addPrimaryClipChangedListener(mClipChangedListener);
+                }
+            } catch (Throwable t) {
+                // Ignore
+            }
+        }
     }
 
     private int getKeyboardModeNum(int origMode, int override) {
@@ -672,6 +714,16 @@ public class LatinIME extends InputMethodService implements
         	unregisterReceiver(mNotificationReceiver);
             mNotificationReceiver = null;
         }
+        if (mClipChangedListener != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            try {
+                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (cm != null) {
+                    cm.removePrimaryClipChangedListener(mClipChangedListener);
+                }
+            } catch (Throwable t) {
+                // Ignore
+            }
+        }
         super.onDestroy();
     }
 
@@ -723,6 +775,24 @@ public class LatinIME extends InputMethodService implements
             mCandidateView = (CandidateView) mCandidateViewContainer.findViewById(R.id.candidates);
             mCandidateView.setPadding(0, 0, 0, 0);
             mCandidateView.setService(this);
+            View btnClipboard = mCandidateViewContainer.findViewById(R.id.btn_clipboard);
+            if (btnClipboard != null) {
+                btnClipboard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mIsShowingClipboard) {
+                                    hideClipboardNotepad();
+                                } else {
+                                    showClipboardNotepad();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 
@@ -752,22 +822,64 @@ public class LatinIME extends InputMethodService implements
             mInputContainer.addView(inputView, kbdLp);
 
             initEmojiAndVoiceViews();
+            initClipboardNotepadView();
             if (mEmojiKeyboardView != null) {
                 if (mEmojiKeyboardView.getParent() instanceof ViewGroup) {
                     ((ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
                 }
-                mInputContainer.addView(mEmojiKeyboardView, kbdLp);
+                LinearLayout.LayoutParams emojiLp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                mInputContainer.addView(mEmojiKeyboardView, emojiLp);
             }
             if (mVoiceInputView != null) {
                 if (mVoiceInputView.getParent() instanceof ViewGroup) {
                     ((ViewGroup) mVoiceInputView.getParent()).removeView(mVoiceInputView);
                 }
-                mInputContainer.addView(mVoiceInputView, kbdLp);
+                LinearLayout.LayoutParams voiceLp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                mInputContainer.addView(mVoiceInputView, voiceLp);
+            }
+            if (mClipboardNotepadView != null) {
+                if (mClipboardNotepadView.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) mClipboardNotepadView.getParent()).removeView(mClipboardNotepadView);
+                }
+                LinearLayout.LayoutParams clipLp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                mInputContainer.addView(mClipboardNotepadView, clipLp);
             }
         }
 
         updateCandidateVisibility();
         setInputView(mInputContainer);
+    }
+
+    private void initClipboardNotepadView() {
+        if (mClipboardNotepadView == null) {
+            mClipboardNotepadView = new ClipboardNotepadView(this);
+            mClipboardNotepadView.setVisibility(View.GONE);
+            mClipboardNotepadView.setListener(new ClipboardNotepadView.ClipboardNotepadListener() {
+                @Override
+                public void onPasteText(String text) {
+                    if (text != null) {
+                        InputConnection ic = getCurrentInputConnection();
+                        if (ic != null) {
+                            ic.beginBatchEdit();
+                            ic.commitText(text, 1);
+                            ic.endBatchEdit();
+                        }
+                    }
+                    hideClipboardNotepad();
+                }
+
+                @Override
+                public void onCloseRequested() {
+                    hideClipboardNotepad();
+                }
+            });
+        }
     }
 
     private void initEmojiAndVoiceViews() {
@@ -833,9 +945,11 @@ public class LatinIME extends InputMethodService implements
             inputView.setVisibility(View.GONE);
         }
         if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+        if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
         mEmojiKeyboardView.setVisibility(View.VISIBLE);
         mIsShowingEmoji = true;
         mIsShowingVoice = false;
+        mIsShowingClipboard = false;
     }
 
     public void hideEmojiKeyboard() {
@@ -843,11 +957,47 @@ public class LatinIME extends InputMethodService implements
         mEmojiKeyboardView.setVisibility(View.GONE);
         if (mKeyboardSwitcher != null) {
             LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null) {
+            if (inputView != null && !mIsShowingVoice && !mIsShowingClipboard) {
                 inputView.setVisibility(View.VISIBLE);
             }
         }
         mIsShowingEmoji = false;
+    }
+
+    public void showClipboardNotepad() {
+        if (mClipboardNotepadView == null || mKeyboardSwitcher == null) return;
+        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+        if (inputView != null) {
+            int h = inputView.getHeight();
+            if (h > 0) {
+                ViewGroup.LayoutParams lp = mClipboardNotepadView.getLayoutParams();
+                if (lp != null) {
+                    lp.height = h;
+                    mClipboardNotepadView.setLayoutParams(lp);
+                }
+            }
+            inputView.setVisibility(View.GONE);
+        }
+        if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
+        if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+        mClipboardNotepadView.refreshClipboardList();
+        mClipboardNotepadView.refreshNotepadList();
+        mClipboardNotepadView.setVisibility(View.VISIBLE);
+        mIsShowingClipboard = true;
+        mIsShowingEmoji = false;
+        mIsShowingVoice = false;
+    }
+
+    public void hideClipboardNotepad() {
+        if (mClipboardNotepadView == null) return;
+        mClipboardNotepadView.setVisibility(View.GONE);
+        if (mKeyboardSwitcher != null) {
+            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+            if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice) {
+                inputView.setVisibility(View.VISIBLE);
+            }
+        }
+        mIsShowingClipboard = false;
     }
 
     public void showVoiceInput() {
@@ -887,6 +1037,7 @@ public class LatinIME extends InputMethodService implements
             inputView.setVisibility(View.GONE);
         }
         if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
+        if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
         boolean isPersian = (mInputLocale != null && mInputLocale.startsWith("fa"))
                 || (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale));
         mVoiceInputView.setInitialLanguage(isPersian);
@@ -894,6 +1045,7 @@ public class LatinIME extends InputMethodService implements
         mVoiceInputView.startListening();
         mIsShowingVoice = true;
         mIsShowingEmoji = false;
+        mIsShowingClipboard = false;
     }
 
     public void hideVoiceInput() {
@@ -902,7 +1054,7 @@ public class LatinIME extends InputMethodService implements
         mVoiceInputView.setVisibility(View.GONE);
         if (mKeyboardSwitcher != null) {
             LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null) {
+            if (inputView != null && !mIsShowingEmoji && !mIsShowingClipboard) {
                 inputView.setVisibility(View.VISIBLE);
             }
         }
@@ -1173,6 +1325,7 @@ public class LatinIME extends InputMethodService implements
         super.onFinishInputView(finishingInput);
         hideEmojiKeyboard();
         hideVoiceInput();
+        hideClipboardNotepad();
         // Remove penging messages related to update suggestions
         mHandler.removeMessages(MSG_UPDATE_SUGGESTIONS);
         mHandler.removeMessages(MSG_UPDATE_OLD_SUGGESTIONS);
@@ -1389,6 +1542,10 @@ public class LatinIME extends InputMethodService implements
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
+            if (mIsShowingClipboard) {
+                hideClipboardNotepad();
+                return true;
+            }
             if (mIsShowingVoice) {
                 hideVoiceInput();
                 return true;
@@ -2190,11 +2347,16 @@ public class LatinIME extends InputMethodService implements
             }
             break;
         case LatinKeyboardView.KEYCODE_OPTIONS:
-            if (mIsShowingEmoji) {
-                hideEmojiKeyboard();
-            } else {
-                showEmojiKeyboard();
-            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mIsShowingEmoji) {
+                        hideEmojiKeyboard();
+                    } else {
+                        showEmojiKeyboard();
+                    }
+                }
+            });
             break;
         case LatinKeyboardView.KEYCODE_OPTIONS_LONGPRESS:
             onOptionKeyPressed();
@@ -2210,11 +2372,16 @@ public class LatinIME extends InputMethodService implements
             toggleLanguage(false, false);
             break;
         case LatinKeyboardView.KEYCODE_VOICE:
-            if (mIsShowingVoice) {
-                hideVoiceInput();
-            } else {
-                showVoiceInput();
-            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mIsShowingVoice) {
+                        hideVoiceInput();
+                    } else {
+                        showVoiceInput();
+                    }
+                }
+            });
             break;
         case 9 /* Tab */:
             if (processMultiKey(primaryCode)) {

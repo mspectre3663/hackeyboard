@@ -389,24 +389,27 @@ public class EmojiKeyboardView extends LinearLayout {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             TextView tv;
             if (convertView instanceof TextView) {
                 tv = (TextView) convertView;
             } else {
                 tv = new TextView(getContext());
-                tv.setLayoutParams(new GridView.LayoutParams(LayoutParams.MATCH_PARENT, dpToPx(48)));
+                tv.setLayoutParams(new android.widget.AbsListView.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(48)));
                 tv.setGravity(Gravity.CENTER);
                 tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
             }
-            final String emoji = mCurrentEmojiList.get(position);
-            tv.setText(emoji);
-            tv.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onEmojiClicked(emoji);
-                }
-            });
+            if (position >= 0 && position < mCurrentEmojiList.size()) {
+                final String emoji = mCurrentEmojiList.get(position);
+                tv.setText(emoji);
+                tv.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onEmojiClicked(emoji);
+                    }
+                });
+            }
             return tv;
         }
     }

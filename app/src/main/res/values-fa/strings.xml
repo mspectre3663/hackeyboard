@@ -139,7 +139,23 @@
     <string name="title_max_suggestions">تعداد ساجست‌ها</string>
     <string name="voice_listening_active">در حال شنیدن...</string>
     <string name="voice_tap_to_speak_prompt">برای صحبت لمس کنید</string>
+    <string name="voice_permission_prompt">برای ورودی صوتی نیاز به مجوز میکروفون است</string>
     <string name="voice_lang_persian">فارسی</string>
     <string name="voice_lang_english">انگلیسی</string>
-    <string name="voice_permission_prompt">برای تایپ صوتی، دسترسی ضبط صدا لازم است.</string>
+    <string name="title_clipboard">کلیپ‌بورد و یادداشت‌ها</string>
+    <string name="title_clipboard_category">کلیپ‌بورد و یادداشت‌ها</string>
+    <string name="pref_clipboard_enabled_title">ذخیره تاریخچه کپی‌ها</string>
+    <string name="pref_clipboard_enabled_summary">ذخیره خودکار متن‌های کپی‌شده برای درج سریع</string>
+    <string name="pref_clipboard_size_title">حداکثر تعداد کپی‌های ذخیره‌شده</string>
+    <string name="tab_clipboard">کلیپ‌بورد</string>
+    <string name="tab_notepad">یادداشت‌ها</string>
+    <string name="btn_new_note">+ یادداشت جدید</string>
+    <string name="note_title_hint">عنوان یادداشت (فقط توضیح، پیست نمی‌شود)</string>
+    <string name="note_content_hint">متن اصلی برای درج و پیست</string>
+    <string name="btn_save">ذخیره</string>
+    <string name="btn_cancel">انصراف</string>
+    <string name="btn_clear_all">پاک‌کردن همه</string>
+    <string name="empty_clipboard">تاریخچه کلیپ‌بورد خالی است</string>
+    <string name="empty_notes">هنوز یادداشتی ثبت نشده است. برای افزودن متن آماده + را بزنید.</string>
+    <string name="note_tap_hint">برای درج متن روی یادداشت بزنید</string>
 </resources>

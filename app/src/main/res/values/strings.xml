@@ -878,7 +878,38 @@
 
     <string name="voice_listening_active">Listening...</string>
     <string name="voice_tap_to_speak_prompt">Tap mic to speak</string>
+    <string name="voice_permission_prompt">Microphone permission is required for voice input</string>
     <string name="voice_lang_persian">FA</string>
     <string name="voice_lang_english">EN</string>
-    <string name="voice_permission_prompt">Audio recording permission is required for voice typing.</string>
+    <string name="title_clipboard">Clipboard &amp; Notes</string>
+    <string name="title_clipboard_category">Clipboard &amp; Notes</string>
+    <string name="pref_clipboard_enabled_title">Save Clipboard History</string>
+    <string name="pref_clipboard_enabled_summary">Automatically save copied text for quick pasting</string>
+    <string name="pref_clipboard_size_title">Maximum clipboard history items</string>
+    <string-array name="clipboard_size_entries">
+        <item>20</item>
+        <item>50 (Default)</item>
+        <item>100</item>
+        <item>150</item>
+        <item>200 (Maximum)</item>
+    </string-array>
+    <string-array name="clipboard_size_values">
+        <item>20</item>
+        <item>50</item>
+        <item>100</item>
+        <item>150</item>
+        <item>200</item>
+    </string-array>
+
+    <string name="tab_clipboard">Clipboard</string>
+    <string name="tab_notepad">Notepad</string>
+    <string name="btn_new_note">+ New Note</string>
+    <string name="note_title_hint">Note title (descriptive, not pasted)</string>
+    <string name="note_content_hint">Text to paste</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_clear_all">Clear All</string>
+    <string name="empty_clipboard">Clipboard history is empty</string>
+    <string name="empty_notes">No notes yet. Tap + to add ready-to-paste text.</string>
+    <string name="note_tap_hint">Tap note to paste content</string>
 </resources>
