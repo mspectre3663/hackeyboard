@@ -179,9 +179,9 @@ public class LatinKeyboard extends Keyboard {
             m123Label = key.label;
             break;
         case LatinKeyboardView.KEYCODE_OPTIONS:
-            key.label = "😊";
-            key.icon = null;
-            key.iconPreview = null;
+            key.label = null;
+            key.icon = mEmojiIcon;
+            key.iconPreview = mEmojiPreviewIcon;
             key.popupResId = 0;
             key.popupCharacters = null;
             break;
@@ -370,12 +370,12 @@ public class LatinKeyboard extends Keyboard {
             key.codes = new int[] { key.label.charAt(0) };
             return; // leave key otherwise unmodified
         }
-        key.label = "😊";
-        key.icon = null;
+        key.label = null;
+        key.icon = mEmojiIcon;
         key.codes = new int[] { LatinKeyboardView.KEYCODE_OPTIONS };
         key.popupResId = 0;
         key.popupCharacters = null;
-        key.iconPreview = null;
+        key.iconPreview = mEmojiPreviewIcon;
     }
     
     private void setNonMicF1Key(Key key, String label, int popupResId) {

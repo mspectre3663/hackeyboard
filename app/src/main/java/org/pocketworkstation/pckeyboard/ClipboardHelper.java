@@ -48,53 +48,148 @@ public class ClipboardHelper {
 
     // --- Clipboard History ---
 
-    public static synchronized List<String> getClips(Context context) {
-        List<String> list = new ArrayList<String>();
+    public static class ClipItem {
+        public String text;
+        public boolean isPinned;
+        public long timestamp;
+
+        public ClipItem(String text, boolean isPinned, long timestamp) {
+            this.text = text;
+            this.isPinned = isPinned;
+            this.timestamp = timestamp;
+        }
+    }
+
+    public static synchronized List<ClipItem> getClipItems(Context context) {
+        List<ClipItem> list = new ArrayList<ClipItem>();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String json = sp.getString(PREF_CLIPBOARD_ITEMS, "[]");
         try {
             JSONArray arr = new JSONArray(json);
             for (int i = 0; i < arr.length(); i++) {
-                list.add(arr.getString(i));
+                Object elem = arr.get(i);
+                if (elem instanceof JSONObject) {
+                    JSONObject obj = (JSONObject) elem;
+                    list.add(new ClipItem(
+                            obj.optString("text", ""),
+                            obj.optBoolean("pinned", false),
+                            obj.optLong("timestamp", System.currentTimeMillis())
+                    ));
+                } else if (elem instanceof String) {
+                    list.add(new ClipItem((String) elem, false, System.currentTimeMillis()));
+                }
             }
         } catch (JSONException ignored) {}
         return list;
+    }
+
+    public static synchronized List<String> getClips(Context context) {
+        List<ClipItem> items = getClipItems(context);
+        List<String> list = new ArrayList<String>();
+        for (ClipItem item : items) {
+            list.add(item.text);
+        }
+        return list;
+    }
+
+    public static synchronized void togglePinClip(Context context, int index) {
+        List<ClipItem> list = getClipItems(context);
+        if (index >= 0 && index < list.size()) {
+            ClipItem item = list.remove(index);
+            item.isPinned = !item.isPinned;
+            if (item.isPinned) {
+                // Move to the very first position (top) as requested
+                list.add(0, item);
+            } else {
+                // Move after any remaining pinned items
+                int insertIdx = 0;
+                while (insertIdx < list.size() && list.get(insertIdx).isPinned) {
+                    insertIdx++;
+                }
+                list.add(insertIdx, item);
+            }
+            saveClipItems(context, list);
+        }
     }
 
     public static synchronized void addClip(Context context, String text) {
         if (text == null || text.trim().isEmpty()) return;
         text = text.trim();
 
-        List<String> list = getClips(context);
-        // Deduplicate: remove if already present
-        list.remove(text);
-        // Add to top
-        list.add(0, text);
-
-        int maxSize = getMaxClipboardSize(context);
-        while (list.size() > maxSize) {
-            list.remove(list.size() - 1);
+        List<ClipItem> list = getClipItems(context);
+        boolean wasPinned = false;
+        // Deduplicate: check if already present
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).text.equals(text)) {
+                wasPinned = list.get(i).isPinned;
+                list.remove(i);
+                break;
+            }
         }
 
-        saveClips(context, list);
+        ClipItem newItem = new ClipItem(text, wasPinned, System.currentTimeMillis());
+        if (wasPinned) {
+            list.add(0, newItem);
+        } else {
+            // Insert right after pinned items
+            int insertIdx = 0;
+            while (insertIdx < list.size() && list.get(insertIdx).isPinned) {
+                insertIdx++;
+            }
+            list.add(insertIdx, newItem);
+        }
+
+        // Pinned items are NEVER auto-deleted! Only unpinned items get trimmed from the end
+        int maxSize = getMaxClipboardSize(context);
+        while (list.size() > maxSize) {
+            int lastUnpinned = -1;
+            for (int i = list.size() - 1; i >= 0; i--) {
+                if (!list.get(i).isPinned) {
+                    lastUnpinned = i;
+                    break;
+                }
+            }
+            if (lastUnpinned >= 0) {
+                list.remove(lastUnpinned);
+            } else {
+                // All remaining items are pinned, do not delete
+                break;
+            }
+        }
+
+        saveClipItems(context, list);
     }
 
     public static synchronized void deleteClip(Context context, int index) {
-        List<String> list = getClips(context);
+        List<ClipItem> list = getClipItems(context);
         if (index >= 0 && index < list.size()) {
             list.remove(index);
-            saveClips(context, list);
+            saveClipItems(context, list);
         }
     }
 
     public static synchronized void clearAllClips(Context context) {
-        saveClips(context, new ArrayList<String>());
+        // Clear unpinned clips, keep pinned clips protected
+        List<ClipItem> list = getClipItems(context);
+        List<ClipItem> pinnedOnly = new ArrayList<ClipItem>();
+        for (ClipItem item : list) {
+            if (item.isPinned) {
+                pinnedOnly.add(item);
+            }
+        }
+        saveClipItems(context, pinnedOnly);
     }
 
-    private static void saveClips(Context context, List<String> list) {
+    private static void saveClipItems(Context context, List<ClipItem> list) {
         JSONArray arr = new JSONArray();
-        for (String s : list) {
-            arr.put(s);
+        for (ClipItem item : list) {
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put("text", item.text);
+                obj.put("pinned", item.isPinned);
+                obj.put("timestamp", item.timestamp);
+                arr.put(obj);
+            } catch (JSONException ignored) {}
         }
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()

@@ -158,4 +158,13 @@
     <string name="empty_clipboard">تاریخچه کلیپ‌بورد خالی است</string>
     <string name="empty_notes">هنوز یادداشتی ثبت نشده است. برای افزودن متن آماده + را بزنید.</string>
     <string name="note_tap_hint">برای درج متن روی یادداشت بزنید</string>
+    <string name="pref_show_clipboard_strip_title">نمایش دکمه کلیپ‌بورد در نوار ساجست</string>
+    <string name="pref_show_clipboard_strip_summary">نمایش آیکون کلیپ‌بورد و یادداشت‌ها در سمت راست نوار بالای کیبورد</string>
+    <string name="pref_show_code_symbols_strip_title">نمایش دکمه علائم برنامه‌نویسی (&lt;/&gt;)</string>
+    <string name="pref_show_code_symbols_strip_summary">نمایش دکمه دسترسی سریع به علائم برنامه‌نویسی در سمت چپ نوار بالای کیبورد</string>
+    <string name="edit_note_title">ویرایش یادداشت</string>
+    <string name="note_editor_help">عنوان صرفاً جهت توضیح است؛ هنگام لمس یادداشت فقط متن اصلی پیست خواهد شد.</string>
+    <string name="note_title_label">عنوان یادداشت (اختیاری):</string>
+    <string name="note_content_label">متن اصلی (متنی که پیست می‌شود):</string>
+    <string name="error_empty_note_content">لطفاً متن اصلی را وارد کنید</string>
 </resources>

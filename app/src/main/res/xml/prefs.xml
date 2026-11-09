@@ -291,6 +291,22 @@
             android:defaultValue="50"
             android:dependency="pref_clipboard_enabled"
             />
+
+        <CheckBoxPreference
+            android:key="pref_show_clipboard_strip_button"
+            android:title="@string/pref_show_clipboard_strip_title"
+            android:summary="@string/pref_show_clipboard_strip_summary"
+            android:persistent="true"
+            android:defaultValue="true"
+            />
+
+        <CheckBoxPreference
+            android:key="pref_show_code_symbols_strip_button"
+            android:title="@string/pref_show_code_symbols_strip_title"
+            android:summary="@string/pref_show_code_symbols_strip_summary"
+            android:persistent="true"
+            android:defaultValue="true"
+            />
     </PreferenceCategory>
 
     <PreferenceCategory

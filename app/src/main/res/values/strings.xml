@@ -912,4 +912,13 @@
     <string name="empty_clipboard">Clipboard history is empty</string>
     <string name="empty_notes">No notes yet. Tap + to add ready-to-paste text.</string>
     <string name="note_tap_hint">Tap note to paste content</string>
+    <string name="pref_show_clipboard_strip_title">Show Clipboard button in candidate bar</string>
+    <string name="pref_show_clipboard_strip_summary">Display clipboard and notes shortcut icon on the right of suggestions</string>
+    <string name="pref_show_code_symbols_strip_title">Show Code Symbols button (&lt;/&gt;)</string>
+    <string name="pref_show_code_symbols_strip_summary">Display developer code symbols button on the left of suggestions</string>
+    <string name="edit_note_title">Edit Note</string>
+    <string name="note_editor_help">Title is for reference only; only the main content will be pasted upon tapping.</string>
+    <string name="note_title_label">Note Title (optional):</string>
+    <string name="note_content_label">Main Content (pasted into field):</string>
+    <string name="error_empty_note_content">Please enter main content</string>
 </resources>

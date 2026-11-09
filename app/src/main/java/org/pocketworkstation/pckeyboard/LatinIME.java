@@ -295,9 +295,11 @@ public class LatinIME extends InputMethodService implements
     private EmojiKeyboardView mEmojiKeyboardView;
     private VoiceInputView mVoiceInputView;
     private ClipboardNotepadView mClipboardNotepadView;
+    private CodeSymbolsView mCodeSymbolsView;
     private boolean mIsShowingEmoji = false;
     private boolean mIsShowingVoice = false;
     private boolean mIsShowingClipboard = false;
+    private boolean mIsShowingCodeSymbols = false;
     private ClipboardManager.OnPrimaryClipChangedListener mClipChangedListener;
 
     public abstract static class WordAlternatives {
@@ -793,6 +795,25 @@ public class LatinIME extends InputMethodService implements
                     }
                 });
             }
+            View btnCodeSymbols = mCandidateViewContainer.findViewById(R.id.btn_code_symbols);
+            if (btnCodeSymbols != null) {
+                btnCodeSymbols.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mIsShowingCodeSymbols) {
+                                    hideCodeSymbols();
+                                } else {
+                                    showCodeSymbols();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            updateStripButtonsVisibility();
         }
     }
 
@@ -823,6 +844,7 @@ public class LatinIME extends InputMethodService implements
 
             initEmojiAndVoiceViews();
             initClipboardNotepadView();
+            initCodeSymbolsView();
             if (mEmojiKeyboardView != null) {
                 if (mEmojiKeyboardView.getParent() instanceof ViewGroup) {
                     ((ViewGroup) mEmojiKeyboardView.getParent()).removeView(mEmojiKeyboardView);
@@ -849,6 +871,15 @@ public class LatinIME extends InputMethodService implements
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
                 mInputContainer.addView(mClipboardNotepadView, clipLp);
+            }
+            if (mCodeSymbolsView != null) {
+                if (mCodeSymbolsView.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) mCodeSymbolsView.getParent()).removeView(mCodeSymbolsView);
+                }
+                LinearLayout.LayoutParams codeLp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                mInputContainer.addView(mCodeSymbolsView, codeLp);
             }
         }
 
@@ -877,6 +908,41 @@ public class LatinIME extends InputMethodService implements
                 @Override
                 public void onCloseRequested() {
                     hideClipboardNotepad();
+                }
+            });
+        }
+    }
+
+    private void initCodeSymbolsView() {
+        if (mCodeSymbolsView == null) {
+            mCodeSymbolsView = new CodeSymbolsView(this);
+            mCodeSymbolsView.setVisibility(View.GONE);
+            mCodeSymbolsView.setListener(new CodeSymbolsView.CodeSymbolsListener() {
+                @Override
+                public void onSymbolSelected(String symbol) {
+                    if (symbol != null) {
+                        InputConnection ic = getCurrentInputConnection();
+                        if (ic != null) {
+                            ic.beginBatchEdit();
+                            ic.commitText(symbol, 1);
+                            ic.endBatchEdit();
+                        }
+                    }
+                }
+
+                @Override
+                public void onBackToKeyboard() {
+                    hideCodeSymbols();
+                }
+
+                @Override
+                public void onBackspace() {
+                    sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL);
+                }
+
+                @Override
+                public void onSpace() {
+                    sendKeyChar(' ');
                 }
             });
         }
@@ -946,10 +1012,12 @@ public class LatinIME extends InputMethodService implements
         }
         if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
         if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
+        if (mCodeSymbolsView != null) mCodeSymbolsView.setVisibility(View.GONE);
         mEmojiKeyboardView.setVisibility(View.VISIBLE);
         mIsShowingEmoji = true;
         mIsShowingVoice = false;
         mIsShowingClipboard = false;
+        mIsShowingCodeSymbols = false;
     }
 
     public void hideEmojiKeyboard() {
@@ -957,7 +1025,7 @@ public class LatinIME extends InputMethodService implements
         mEmojiKeyboardView.setVisibility(View.GONE);
         if (mKeyboardSwitcher != null) {
             LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null && !mIsShowingVoice && !mIsShowingClipboard) {
+            if (inputView != null && !mIsShowingVoice && !mIsShowingClipboard && !mIsShowingCodeSymbols) {
                 inputView.setVisibility(View.VISIBLE);
             }
         }
@@ -980,12 +1048,14 @@ public class LatinIME extends InputMethodService implements
         }
         if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
         if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+        if (mCodeSymbolsView != null) mCodeSymbolsView.setVisibility(View.GONE);
         mClipboardNotepadView.refreshClipboardList();
         mClipboardNotepadView.refreshNotepadList();
         mClipboardNotepadView.setVisibility(View.VISIBLE);
         mIsShowingClipboard = true;
         mIsShowingEmoji = false;
         mIsShowingVoice = false;
+        mIsShowingCodeSymbols = false;
     }
 
     public void hideClipboardNotepad() {
@@ -993,11 +1063,62 @@ public class LatinIME extends InputMethodService implements
         mClipboardNotepadView.setVisibility(View.GONE);
         if (mKeyboardSwitcher != null) {
             LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice) {
+            if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice && !mIsShowingCodeSymbols) {
                 inputView.setVisibility(View.VISIBLE);
             }
         }
         mIsShowingClipboard = false;
+    }
+
+    public void showCodeSymbols() {
+        if (mCodeSymbolsView == null || mKeyboardSwitcher == null) return;
+        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+        if (inputView != null) {
+            int h = inputView.getHeight();
+            if (h > 0) {
+                ViewGroup.LayoutParams lp = mCodeSymbolsView.getLayoutParams();
+                if (lp != null) {
+                    lp.height = h;
+                    mCodeSymbolsView.setLayoutParams(lp);
+                }
+            }
+            inputView.setVisibility(View.GONE);
+        }
+        if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
+        if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+        if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
+        mCodeSymbolsView.setVisibility(View.VISIBLE);
+        mIsShowingCodeSymbols = true;
+        mIsShowingClipboard = false;
+        mIsShowingEmoji = false;
+        mIsShowingVoice = false;
+    }
+
+    public void hideCodeSymbols() {
+        if (mCodeSymbolsView == null) return;
+        mCodeSymbolsView.setVisibility(View.GONE);
+        if (mKeyboardSwitcher != null) {
+            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+            if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice && !mIsShowingClipboard) {
+                inputView.setVisibility(View.VISIBLE);
+            }
+        }
+        mIsShowingCodeSymbols = false;
+    }
+
+    public void updateStripButtonsVisibility() {
+        if (mCandidateViewContainer == null) return;
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean showClipboard = sp.getBoolean("pref_show_clipboard_strip_button", true);
+        boolean showCodeSymbols = sp.getBoolean("pref_show_code_symbols_strip_button", true);
+        View btnClipboard = mCandidateViewContainer.findViewById(R.id.btn_clipboard);
+        if (btnClipboard != null) {
+            btnClipboard.setVisibility(showClipboard ? View.VISIBLE : View.GONE);
+        }
+        View btnCodeSymbols = mCandidateViewContainer.findViewById(R.id.btn_code_symbols);
+        if (btnCodeSymbols != null) {
+            btnCodeSymbols.setVisibility(showCodeSymbols ? View.VISIBLE : View.GONE);
+        }
     }
 
     public void showVoiceInput() {
@@ -1038,6 +1159,7 @@ public class LatinIME extends InputMethodService implements
         }
         if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
         if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
+        if (mCodeSymbolsView != null) mCodeSymbolsView.setVisibility(View.GONE);
         boolean isPersian = (mInputLocale != null && mInputLocale.startsWith("fa"))
                 || (LatinIME.sKeyboardSettings != null && FontUtils.isPersianLocale(LatinIME.sKeyboardSettings.inputLocale));
         mVoiceInputView.setInitialLanguage(isPersian);
@@ -1046,6 +1168,7 @@ public class LatinIME extends InputMethodService implements
         mIsShowingVoice = true;
         mIsShowingEmoji = false;
         mIsShowingClipboard = false;
+        mIsShowingCodeSymbols = false;
     }
 
     public void hideVoiceInput() {
@@ -1054,7 +1177,7 @@ public class LatinIME extends InputMethodService implements
         mVoiceInputView.setVisibility(View.GONE);
         if (mKeyboardSwitcher != null) {
             LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null && !mIsShowingEmoji && !mIsShowingClipboard) {
+            if (inputView != null && !mIsShowingEmoji && !mIsShowingClipboard && !mIsShowingCodeSymbols) {
                 inputView.setVisibility(View.VISIBLE);
             }
         }
@@ -1326,6 +1449,7 @@ public class LatinIME extends InputMethodService implements
         hideEmojiKeyboard();
         hideVoiceInput();
         hideClipboardNotepad();
+        hideCodeSymbols();
         // Remove penging messages related to update suggestions
         mHandler.removeMessages(MSG_UPDATE_SUGGESTIONS);
         mHandler.removeMessages(MSG_UPDATE_OLD_SUGGESTIONS);
@@ -1480,6 +1604,7 @@ public class LatinIME extends InputMethodService implements
         if (mCandidateViewContainer != null) {
             boolean visible = isCandidateStripVisible();
             mCandidateViewContainer.setVisibility(visible ? View.VISIBLE : View.GONE);
+            updateStripButtonsVisibility();
         }
     }
 
@@ -1542,6 +1667,10 @@ public class LatinIME extends InputMethodService implements
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_BACK:
+            if (mIsShowingCodeSymbols) {
+                hideCodeSymbols();
+                return true;
+            }
             if (mIsShowingClipboard) {
                 hideClipboardNotepad();
                 return true;
@@ -3321,6 +3450,10 @@ public class LatinIME extends InputMethodService implements
         int unhandledFlags = sKeyboardSettings.unhandledFlags();
         if (unhandledFlags != GlobalKeyboardSettings.FLAG_PREF_NONE) {
             Log.w(TAG, "Not all flag settings handled, remaining=" + unhandledFlags);
+        }
+
+        if ("pref_show_clipboard_strip_button".equals(key) || "pref_show_code_symbols_strip_button".equals(key)) {
+            updateStripButtonsVisibility();
         }
 
         if (PREF_SELECTED_LANGUAGES.equals(key)) {

@@ -26,6 +26,19 @@
         android:background="@drawable/keyboard_suggest_strip"
         >
 
+    <TextView
+        android:id="@+id/btn_code_symbols"
+        android:layout_width="44dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="&lt;/&gt;"
+        android:textColor="#82AAFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:contentDescription="Code Symbols"
+        android:background="?android:attr/selectableItemBackground"
+        />
+
     <org.pocketworkstation.pckeyboard.CandidateView
         android:id="@+id/candidates"
         android:layout_width="0dp"

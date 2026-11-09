@@ -3,6 +3,7 @@ package org.pocketworkstation.pckeyboard;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.TextUtils;
@@ -11,7 +12,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -36,12 +36,6 @@ public class ClipboardNotepadView extends LinearLayout {
 
     private LinearLayout mClipboardLayout;
     private LinearLayout mNotepadLayout;
-
-    // In-place note editor
-    private View mNoteEditorOverlay;
-    private EditText mEditNoteTitle;
-    private EditText mEditNoteContent;
-    private String mEditingNoteId = null;
 
     public ClipboardNotepadView(Context context) {
         super(context);
@@ -112,7 +106,6 @@ public class ClipboardNotepadView extends LinearLayout {
 
         buildClipboardView(context);
         buildNotepadView(context);
-        buildEditorView(context);
 
         selectTab(0);
     }
@@ -141,9 +134,6 @@ public class ClipboardNotepadView extends LinearLayout {
 
     public void selectTab(int tabIndex) {
         mCurrentTab = tabIndex;
-        if (mNoteEditorOverlay != null) {
-            mNoteEditorOverlay.setVisibility(GONE);
-        }
 
         if (tabIndex == 0) {
             // Clipboard
@@ -221,7 +211,7 @@ public class ClipboardNotepadView extends LinearLayout {
         mClipsContainer.removeAllViews();
         final Context context = getContext();
 
-        List<String> clips = ClipboardHelper.getClips(context);
+        List<ClipboardHelper.ClipItem> clips = ClipboardHelper.getClipItems(context);
         if (clips.isEmpty()) {
             TextView empty = new TextView(context);
             empty.setText(R.string.empty_clipboard);
@@ -235,13 +225,14 @@ public class ClipboardNotepadView extends LinearLayout {
 
         for (int i = 0; i < clips.size(); i++) {
             final int clipIndex = i;
-            final String clipText = clips.get(i);
+            final ClipboardHelper.ClipItem item = clips.get(i);
+            final String clipText = item.text;
 
             LinearLayout card = new LinearLayout(context);
             card.setOrientation(HORIZONTAL);
             card.setGravity(Gravity.CENTER_VERTICAL);
-            card.setBackgroundColor(Color.parseColor("#1F2027"));
-            card.setPadding(dpToPx(12), dpToPx(10), dpToPx(8), dpToPx(10));
+            card.setBackgroundColor(item.isPinned ? Color.parseColor("#262938") : Color.parseColor("#1F2027"));
+            card.setPadding(dpToPx(12), dpToPx(10), dpToPx(6), dpToPx(10));
             card.setClickable(true);
             card.setOnClickListener(new OnClickListener() {
                 @Override
@@ -253,12 +244,28 @@ public class ClipboardNotepadView extends LinearLayout {
             });
 
             TextView text = new TextView(context);
-            text.setText(clipText);
+            text.setText((item.isPinned ? "📌 " : "") + clipText);
             text.setTextColor(Color.WHITE);
             text.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
             text.setMaxLines(3);
             text.setEllipsize(TextUtils.TruncateAt.END);
             card.addView(text, new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1.0f));
+
+            // Pin button (brings to first message and protects from auto-deletion)
+            TextView pinBtn = new TextView(context);
+            pinBtn.setText(item.isPinned ? "📌" : "📍");
+            pinBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            pinBtn.setGravity(Gravity.CENTER);
+            pinBtn.setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8));
+            pinBtn.setClickable(true);
+            pinBtn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardHelper.togglePinClip(context, clipIndex);
+                    refreshClipboardList();
+                }
+            });
+            card.addView(pinBtn);
 
             // Delete single clip button
             TextView delBtn = new TextView(context);
@@ -427,122 +434,22 @@ public class ClipboardNotepadView extends LinearLayout {
         }
     }
 
-    // --- IN-PLACE NOTE EDITOR ---
-
-    private void buildEditorView(final Context context) {
-        ScrollView scroll = new ScrollView(context);
-        scroll.setBackgroundColor(Color.parseColor("#181920"));
-
-        LinearLayout editor = new LinearLayout(context);
-        editor.setOrientation(VERTICAL);
-        editor.setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(16));
-
-        TextView titleLabel = new TextView(context);
-        titleLabel.setText("عنوان یادداشت (فقط برای شناسایی، درج نمی‌شود):");
-        titleLabel.setTextColor(Color.parseColor("#A0A4B4"));
-        titleLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        editor.addView(titleLabel);
-
-        mEditNoteTitle = new EditText(context);
-        mEditNoteTitle.setHint("مثلا: این کارت برای منه و رمزش 2222");
-        mEditNoteTitle.setHintTextColor(Color.parseColor("#5A5D6E"));
-        mEditNoteTitle.setTextColor(Color.WHITE);
-        mEditNoteTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        mEditNoteTitle.setBackgroundColor(Color.parseColor("#22242D"));
-        mEditNoteTitle.setPadding(dpToPx(10), dpToPx(8), dpToPx(10), dpToPx(8));
-        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        titleLp.setMargins(0, dpToPx(4), 0, dpToPx(12));
-        editor.addView(mEditNoteTitle, titleLp);
-
-        TextView contentLabel = new TextView(context);
-        contentLabel.setText("متن اصلی (این متن هنگام کلیک پیست می‌شود):");
-        contentLabel.setTextColor(Color.parseColor("#A0A4B4"));
-        contentLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        editor.addView(contentLabel);
-
-        mEditNoteContent = new EditText(context);
-        mEditNoteContent.setHint("مثلا: 5555555555555555 یا متن پیام آماده");
-        mEditNoteContent.setHintTextColor(Color.parseColor("#5A5D6E"));
-        mEditNoteContent.setTextColor(Color.WHITE);
-        mEditNoteContent.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        mEditNoteContent.setBackgroundColor(Color.parseColor("#22242D"));
-        mEditNoteContent.setPadding(dpToPx(10), dpToPx(8), dpToPx(10), dpToPx(8));
-        mEditNoteContent.setMinLines(3);
-        mEditNoteContent.setGravity(Gravity.TOP);
-        LinearLayout.LayoutParams contentLp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        contentLp.setMargins(0, dpToPx(4), 0, dpToPx(16));
-        editor.addView(mEditNoteContent, contentLp);
-
-        // Buttons row (Save, Cancel)
-        LinearLayout btnRow = new LinearLayout(context);
-        btnRow.setOrientation(HORIZONTAL);
-        btnRow.setGravity(Gravity.END);
-
-        TextView cancelBtn = new TextView(context);
-        cancelBtn.setText("انصراف");
-        cancelBtn.setTextColor(Color.parseColor("#9FA3B2"));
-        cancelBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        cancelBtn.setBackgroundColor(Color.parseColor("#252731"));
-        cancelBtn.setPadding(dpToPx(18), dpToPx(8), dpToPx(18), dpToPx(8));
-        cancelBtn.setClickable(true);
-        cancelBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNoteEditorOverlay.setVisibility(GONE);
-            }
-        });
-        btnRow.addView(cancelBtn);
-
-        TextView saveBtn = new TextView(context);
-        saveBtn.setText("ذخیره یادداشت");
-        saveBtn.setTextColor(Color.WHITE);
-        saveBtn.setTypeface(Typeface.DEFAULT_BOLD);
-        saveBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        saveBtn.setBackgroundColor(Color.parseColor("#2E5BFF"));
-        saveBtn.setPadding(dpToPx(20), dpToPx(8), dpToPx(20), dpToPx(8));
-        saveBtn.setClickable(true);
-        saveBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveCurrentNote();
-            }
-        });
-        LinearLayout.LayoutParams saveLp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        saveLp.setMargins(dpToPx(10), 0, 0, 0);
-        btnRow.addView(saveBtn, saveLp);
-
-        editor.addView(btnRow);
-        scroll.addView(editor);
-
-        mNoteEditorOverlay = scroll;
-        mNoteEditorOverlay.setVisibility(GONE);
-        mContentContainer.addView(mNoteEditorOverlay, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-    }
-
     private void openNoteEditor(String id, String title, String content) {
-        mEditingNoteId = id;
-        mEditNoteTitle.setText(title != null ? title : "");
-        mEditNoteContent.setText(content != null ? content : "");
-        mNoteEditorOverlay.setVisibility(VISIBLE);
-        mEditNoteContent.requestFocus();
-    }
-
-    private void saveCurrentNote() {
-        String title = mEditNoteTitle.getText().toString();
-        String content = mEditNoteContent.getText().toString();
-        if (content.trim().isEmpty()) {
-            Toast.makeText(getContext(), "لطفاً متن اصلی را وارد کنید", Toast.LENGTH_SHORT).show();
-            return;
+        final Context context = getContext();
+        NoteEditorActivity.setCallback(new NoteEditorActivity.NoteSaveCallback() {
+            @Override
+            public void onNoteSaved() {
+                refreshNotepadList();
+            }
+        });
+        Intent intent = new Intent(context, NoteEditorActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (id != null) {
+            intent.putExtra(NoteEditorActivity.EXTRA_NOTE_ID, id);
+            intent.putExtra(NoteEditorActivity.EXTRA_NOTE_TITLE, title);
+            intent.putExtra(NoteEditorActivity.EXTRA_NOTE_CONTENT, content);
         }
-
-        if (mEditingNoteId == null) {
-            ClipboardHelper.addNote(getContext(), title, content);
-        } else {
-            ClipboardHelper.updateNote(getContext(), mEditingNoteId, title, content);
-        }
-
-        mNoteEditorOverlay.setVisibility(GONE);
-        refreshNotepadList();
+        context.startActivity(intent);
     }
 
     private int dpToPx(float dp) {
