@@ -31,6 +31,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -1099,6 +1100,39 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                 // hint and popup hint.
                 shouldDrawIcon = shouldDrawLabelAndIcon(key);
             }
+
+            if (key.codes != null && key.codes.length > 0 && key.codes[0] == LatinKeyboardView.KEYCODE_OPTIONS) {
+                float cx = (key.width + padding.left - padding.right) / 2f;
+                float cy = (key.height + padding.top - padding.bottom) / 2f;
+                float radius = Math.min(key.width, key.height) * 0.26f;
+
+                int emojiColor = (mKeyTextColor != 0) ? mKeyTextColor : Color.WHITE;
+
+                Paint emojiPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                emojiPaint.setColor(emojiColor);
+                emojiPaint.setStyle(Paint.Style.STROKE);
+                emojiPaint.setStrokeWidth(Math.max(2.2f, radius * 0.16f));
+                emojiPaint.setStrokeCap(Paint.Cap.ROUND);
+
+                // Head circle
+                canvas.drawCircle(cx, cy, radius, emojiPaint);
+
+                // Eyes
+                emojiPaint.setStyle(Paint.Style.FILL);
+                float eyeOffX = radius * 0.36f;
+                float eyeOffY = radius * 0.22f;
+                float eyeR = Math.max(1.8f, radius * 0.15f);
+                canvas.drawCircle(cx - eyeOffX, cy - eyeOffY, eyeR, emojiPaint);
+                canvas.drawCircle(cx + eyeOffX, cy - eyeOffY, eyeR, emojiPaint);
+
+                // Smile arc
+                emojiPaint.setStyle(Paint.Style.STROKE);
+                RectF smileRect = new RectF(cx - radius * 0.52f, cy - radius * 0.25f, cx + radius * 0.52f, cy + radius * 0.52f);
+                canvas.drawArc(smileRect, 20, 140, false, emojiPaint);
+
+                shouldDrawIcon = false;
+            }
+
             Drawable icon = key.icon;
             if (icon != null && shouldDrawIcon) {
                 // Special handing for the upper-right number hint icons
@@ -1219,10 +1253,14 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             return;
         //Log.i(TAG, "showKey() for " + this);
         // Should not draw hint icon in key preview
-        Drawable icon = key.icon;
-        if (icon != null && !shouldDrawLabelAndIcon(key)) {
+        if (key.codes != null && key.codes.length > 0 && key.codes[0] == LatinKeyboardView.KEYCODE_OPTIONS) {
+            mPreviewText.setCompoundDrawables(null, null, null, null);
+            mPreviewText.setText("😊");
+            mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mPreviewTextSizeLarge);
+            mPreviewText.setTypeface(Typeface.DEFAULT);
+        } else if (key.icon != null && !shouldDrawLabelAndIcon(key)) {
             mPreviewText.setCompoundDrawables(null, null, null,
-                    key.iconPreview != null ? key.iconPreview : icon);
+                    key.iconPreview != null ? key.iconPreview : key.icon);
             mPreviewText.setText(null);
         } else {
             mPreviewText.setCompoundDrawables(null, null, null, null);

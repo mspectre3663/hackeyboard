@@ -32,7 +32,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="&lt;/&gt;"
-        android:textColor="#82AAFF"
+        android:textColor="#FFFFFF"
         android:textSize="14sp"
         android:textStyle="bold"
         android:contentDescription="Code Symbols"

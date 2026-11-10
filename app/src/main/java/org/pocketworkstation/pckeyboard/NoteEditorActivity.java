@@ -51,14 +51,14 @@ public class NoteEditorActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.parseColor("#18191E"));
-        int pad = dpToPx(16);
-        root.setPadding(pad, pad, pad, pad);
+        int pad = dpToPx(14);
+        root.setPadding(pad, dpToPx(10), pad, dpToPx(12));
 
         // Header Title
         TextView header = new TextView(this);
         header.setText(isEdit ? "✏️ " + getString(R.string.edit_note_title) : "➕ " + getString(R.string.btn_new_note));
         header.setTextColor(Color.WHITE);
-        header.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+        header.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         header.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(header);
 
@@ -66,8 +66,8 @@ public class NoteEditorActivity extends Activity {
         TextView notice = new TextView(this);
         notice.setText(R.string.note_editor_help);
         notice.setTextColor(Color.parseColor("#8E92A4"));
-        notice.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        notice.setPadding(0, dpToPx(4), 0, dpToPx(12));
+        notice.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        notice.setPadding(0, dpToPx(2), 0, dpToPx(8));
         root.addView(notice);
 
         ScrollView scroll = new ScrollView(this);
@@ -78,72 +78,78 @@ public class NoteEditorActivity extends Activity {
         TextView titleLabel = new TextView(this);
         titleLabel.setText(R.string.note_title_label);
         titleLabel.setTextColor(Color.parseColor("#CCD0E0"));
-        titleLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        titleLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         fieldsLayout.addView(titleLabel);
 
         mTitleEdit = new EditText(this);
         mTitleEdit.setHint(R.string.note_title_hint);
         mTitleEdit.setHintTextColor(Color.parseColor("#5A5D6E"));
         mTitleEdit.setTextColor(Color.WHITE);
-        mTitleEdit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        mTitleEdit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         mTitleEdit.setBackgroundColor(Color.parseColor("#22242C"));
-        int editPad = dpToPx(10);
+        int editPad = dpToPx(8);
         mTitleEdit.setPadding(editPad, editPad, editPad, editPad);
-        mTitleEdit.setMaxLines(2);
+        mTitleEdit.setMaxLines(1);
+        mTitleEdit.setSingleLine(true);
         if (initialTitle != null) mTitleEdit.setText(initialTitle);
         LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        titleLp.setMargins(0, dpToPx(4), 0, dpToPx(12));
+        titleLp.setMargins(0, dpToPx(2), 0, dpToPx(8));
         fieldsLayout.addView(mTitleEdit, titleLp);
 
         // Content label
         TextView contentLabel = new TextView(this);
         contentLabel.setText(R.string.note_content_label);
         contentLabel.setTextColor(Color.parseColor("#CCD0E0"));
-        contentLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        contentLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         fieldsLayout.addView(contentLabel);
 
         mContentEdit = new EditText(this);
         mContentEdit.setHint(R.string.note_content_hint);
         mContentEdit.setHintTextColor(Color.parseColor("#5A5D6E"));
         mContentEdit.setTextColor(Color.WHITE);
-        mContentEdit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        mContentEdit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         mContentEdit.setBackgroundColor(Color.parseColor("#22242C"));
         mContentEdit.setPadding(editPad, editPad, editPad, editPad);
-        mContentEdit.setMinLines(4);
-        mContentEdit.setMaxLines(8);
+        mContentEdit.setMinLines(3);
+        mContentEdit.setMaxLines(4);
         mContentEdit.setGravity(Gravity.TOP | Gravity.START);
         if (initialContent != null) mContentEdit.setText(initialContent);
         LinearLayout.LayoutParams contentLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        contentLp.setMargins(0, dpToPx(4), 0, dpToPx(16));
+        contentLp.setMargins(0, dpToPx(2), 0, dpToPx(10));
         fieldsLayout.addView(mContentEdit, contentLp);
 
         scroll.addView(fieldsLayout);
         root.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f));
 
-        // Buttons row
+        // Buttons row: Centered with emojis and compact height
         LinearLayout btnRow = new LinearLayout(this);
         btnRow.setOrientation(LinearLayout.HORIZONTAL);
-        btnRow.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
-        btnRow.setPadding(0, dpToPx(12), 0, 0);
+        btnRow.setGravity(Gravity.CENTER);
+        btnRow.setPadding(0, dpToPx(6), 0, 0);
 
         Button cancelBtn = new Button(this);
-        cancelBtn.setText(R.string.btn_cancel);
+        cancelBtn.setText("❌ " + getString(R.string.btn_cancel));
         cancelBtn.setTextColor(Color.parseColor("#CCD0E0"));
-        cancelBtn.setBackgroundColor(Color.parseColor("#2B2D38"));
+        cancelBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        cancelBtn.setBackground(createButtonBg("#2B2D38", 8));
+        cancelBtn.setPadding(dpToPx(16), dpToPx(2), dpToPx(16), dpToPx(2));
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
-        LinearLayout.LayoutParams cancelLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        cancelLp.setMargins(0, 0, dpToPx(10), 0);
+        LinearLayout.LayoutParams cancelLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, dpToPx(36));
+        cancelLp.setMargins(0, 0, dpToPx(12), 0);
         btnRow.addView(cancelBtn, cancelLp);
 
         Button saveBtn = new Button(this);
-        saveBtn.setText(R.string.btn_save);
+        saveBtn.setText("💾 " + getString(R.string.btn_save));
         saveBtn.setTextColor(Color.WHITE);
-        saveBtn.setBackgroundColor(Color.parseColor("#2E5BFF"));
+        saveBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        saveBtn.setBackground(createButtonBg("#2E5BFF", 8));
+        saveBtn.setPadding(dpToPx(18), dpToPx(2), dpToPx(18), dpToPx(2));
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -165,13 +171,24 @@ public class NoteEditorActivity extends Activity {
                 finish();
             }
         });
-        btnRow.addView(saveBtn);
+        LinearLayout.LayoutParams saveLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, dpToPx(36));
+        btnRow.addView(saveBtn, saveLp);
         root.addView(btnRow);
 
         setContentView(root);
 
-        // Auto-show keyboard
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        // Position window at top of screen with wide width to avoid keyboard collision
+        android.view.Window window = getWindow();
+        if (window != null) {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            WindowManager.LayoutParams wlp = window.getAttributes();
+            wlp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+            wlp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            wlp.y = dpToPx(8);
+            window.setAttributes(wlp);
+        }
+
         final EditText targetFocus = (initialTitle == null || initialTitle.isEmpty()) ? mTitleEdit : mContentEdit;
         targetFocus.requestFocus();
         if (targetFocus == mContentEdit) {
@@ -186,6 +203,13 @@ public class NoteEditorActivity extends Activity {
                 }
             }
         }, 150);
+    }
+
+    private android.graphics.drawable.GradientDrawable createButtonBg(String colorHex, float radiusDp) {
+        android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+        gd.setColor(Color.parseColor(colorHex));
+        gd.setCornerRadius(dpToPx(radiusDp));
+        return gd;
     }
 
     private int dpToPx(float dp) {

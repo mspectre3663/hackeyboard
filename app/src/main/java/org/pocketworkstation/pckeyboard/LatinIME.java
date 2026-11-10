@@ -300,6 +300,7 @@ public class LatinIME extends InputMethodService implements
     private boolean mIsShowingVoice = false;
     private boolean mIsShowingClipboard = false;
     private boolean mIsShowingCodeSymbols = false;
+    private boolean mIsShowingCodeSymbolsInStrip = false;
     private ClipboardManager.OnPrimaryClipChangedListener mClipChangedListener;
 
     public abstract static class WordAlternatives {
@@ -805,11 +806,32 @@ public class LatinIME extends InputMethodService implements
                             public void run() {
                                 if (mIsShowingCodeSymbols) {
                                     hideCodeSymbols();
+                                }
+                                if (mIsShowingCodeSymbolsInStrip) {
+                                    mIsShowingCodeSymbolsInStrip = false;
+                                    updateSuggestions();
                                 } else {
-                                    showCodeSymbols();
+                                    mIsShowingCodeSymbolsInStrip = true;
+                                    showCodeSymbolsInStrip();
                                 }
                             }
                         });
+                    }
+                });
+                btnCodeSymbols.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mIsShowingCodeSymbolsInStrip) {
+                                    mIsShowingCodeSymbolsInStrip = false;
+                                    updateSuggestions();
+                                }
+                                showCodeSymbols();
+                            }
+                        });
+                        return true;
                     }
                 });
             }
@@ -997,113 +1019,165 @@ public class LatinIME extends InputMethodService implements
     }
 
     public void showEmojiKeyboard() {
-        if (mEmojiKeyboardView == null || mKeyboardSwitcher == null) return;
-        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-        if (inputView != null) {
-            int h = inputView.getHeight();
-            if (h > 0) {
-                ViewGroup.LayoutParams lp = mEmojiKeyboardView.getLayoutParams();
-                if (lp != null) {
-                    lp.height = h;
-                    mEmojiKeyboardView.setLayoutParams(lp);
+        try {
+            if (mKeyboardSwitcher == null) return;
+            initEmojiAndVoiceViews();
+            if (mEmojiKeyboardView == null) return;
+            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+            if (inputView != null) {
+                inputView.closing();
+                int h = inputView.getHeight();
+                if (h > 0) {
+                    ViewGroup.LayoutParams lp = mEmojiKeyboardView.getLayoutParams();
+                    if (lp != null) {
+                        lp.height = h;
+                        mEmojiKeyboardView.setLayoutParams(lp);
+                    }
                 }
+                inputView.setVisibility(View.GONE);
             }
-            inputView.setVisibility(View.GONE);
+            if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+            if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
+            if (mCodeSymbolsView != null) mCodeSymbolsView.setVisibility(View.GONE);
+            mEmojiKeyboardView.setVisibility(View.VISIBLE);
+            mIsShowingEmoji = true;
+            mIsShowingVoice = false;
+            mIsShowingClipboard = false;
+            mIsShowingCodeSymbols = false;
+        } catch (Throwable t) {
+            Log.e(TAG, "Error in showEmojiKeyboard", t);
         }
-        if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
-        if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
-        if (mCodeSymbolsView != null) mCodeSymbolsView.setVisibility(View.GONE);
-        mEmojiKeyboardView.setVisibility(View.VISIBLE);
-        mIsShowingEmoji = true;
-        mIsShowingVoice = false;
-        mIsShowingClipboard = false;
-        mIsShowingCodeSymbols = false;
     }
 
     public void hideEmojiKeyboard() {
-        if (mEmojiKeyboardView == null) return;
-        mEmojiKeyboardView.setVisibility(View.GONE);
-        if (mKeyboardSwitcher != null) {
-            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null && !mIsShowingVoice && !mIsShowingClipboard && !mIsShowingCodeSymbols) {
-                inputView.setVisibility(View.VISIBLE);
+        try {
+            if (mEmojiKeyboardView == null) return;
+            mEmojiKeyboardView.setVisibility(View.GONE);
+            if (mKeyboardSwitcher != null) {
+                LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+                if (inputView != null && !mIsShowingVoice && !mIsShowingClipboard && !mIsShowingCodeSymbols) {
+                    inputView.setVisibility(View.VISIBLE);
+                }
             }
+            mIsShowingEmoji = false;
+        } catch (Throwable t) {
+            Log.e(TAG, "Error in hideEmojiKeyboard", t);
         }
-        mIsShowingEmoji = false;
     }
 
     public void showClipboardNotepad() {
-        if (mClipboardNotepadView == null || mKeyboardSwitcher == null) return;
-        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-        if (inputView != null) {
-            int h = inputView.getHeight();
-            if (h > 0) {
-                ViewGroup.LayoutParams lp = mClipboardNotepadView.getLayoutParams();
-                if (lp != null) {
-                    lp.height = h;
-                    mClipboardNotepadView.setLayoutParams(lp);
+        try {
+            if (mKeyboardSwitcher == null) return;
+            initClipboardNotepadView();
+            if (mClipboardNotepadView == null) return;
+            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+            if (inputView != null) {
+                inputView.closing();
+                int h = inputView.getHeight();
+                if (h > 0) {
+                    ViewGroup.LayoutParams lp = mClipboardNotepadView.getLayoutParams();
+                    if (lp != null) {
+                        lp.height = h;
+                        mClipboardNotepadView.setLayoutParams(lp);
+                    }
                 }
+                inputView.setVisibility(View.GONE);
             }
-            inputView.setVisibility(View.GONE);
+            if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
+            if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+            if (mCodeSymbolsView != null) mCodeSymbolsView.setVisibility(View.GONE);
+            mClipboardNotepadView.refreshClipboardList();
+            mClipboardNotepadView.refreshNotepadList();
+            mClipboardNotepadView.setVisibility(View.VISIBLE);
+            mIsShowingClipboard = true;
+            mIsShowingEmoji = false;
+            mIsShowingVoice = false;
+            mIsShowingCodeSymbols = false;
+        } catch (Throwable t) {
+            Log.e(TAG, "Error in showClipboardNotepad", t);
         }
-        if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
-        if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
-        if (mCodeSymbolsView != null) mCodeSymbolsView.setVisibility(View.GONE);
-        mClipboardNotepadView.refreshClipboardList();
-        mClipboardNotepadView.refreshNotepadList();
-        mClipboardNotepadView.setVisibility(View.VISIBLE);
-        mIsShowingClipboard = true;
-        mIsShowingEmoji = false;
-        mIsShowingVoice = false;
-        mIsShowingCodeSymbols = false;
     }
 
     public void hideClipboardNotepad() {
-        if (mClipboardNotepadView == null) return;
-        mClipboardNotepadView.setVisibility(View.GONE);
-        if (mKeyboardSwitcher != null) {
-            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice && !mIsShowingCodeSymbols) {
-                inputView.setVisibility(View.VISIBLE);
+        try {
+            if (mClipboardNotepadView == null) return;
+            mClipboardNotepadView.setVisibility(View.GONE);
+            if (mKeyboardSwitcher != null) {
+                LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+                if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice && !mIsShowingCodeSymbols) {
+                    inputView.setVisibility(View.VISIBLE);
+                }
             }
+            mIsShowingClipboard = false;
+        } catch (Throwable t) {
+            Log.e(TAG, "Error in hideClipboardNotepad", t);
         }
-        mIsShowingClipboard = false;
     }
 
     public void showCodeSymbols() {
-        if (mCodeSymbolsView == null || mKeyboardSwitcher == null) return;
-        LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-        if (inputView != null) {
-            int h = inputView.getHeight();
-            if (h > 0) {
-                ViewGroup.LayoutParams lp = mCodeSymbolsView.getLayoutParams();
-                if (lp != null) {
-                    lp.height = h;
-                    mCodeSymbolsView.setLayoutParams(lp);
+        try {
+            if (mKeyboardSwitcher == null) return;
+            initCodeSymbolsView();
+            if (mCodeSymbolsView == null) return;
+            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+            if (inputView != null) {
+                inputView.closing();
+                int h = inputView.getHeight();
+                if (h > 0) {
+                    ViewGroup.LayoutParams lp = mCodeSymbolsView.getLayoutParams();
+                    if (lp != null) {
+                        lp.height = h;
+                        mCodeSymbolsView.setLayoutParams(lp);
+                    }
                 }
+                inputView.setVisibility(View.GONE);
             }
-            inputView.setVisibility(View.GONE);
+            if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
+            if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
+            if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
+            mCodeSymbolsView.setVisibility(View.VISIBLE);
+            mIsShowingCodeSymbols = true;
+            mIsShowingClipboard = false;
+            mIsShowingEmoji = false;
+            mIsShowingVoice = false;
+        } catch (Throwable t) {
+            Log.e(TAG, "Error in showCodeSymbols", t);
         }
-        if (mEmojiKeyboardView != null) mEmojiKeyboardView.setVisibility(View.GONE);
-        if (mVoiceInputView != null) mVoiceInputView.setVisibility(View.GONE);
-        if (mClipboardNotepadView != null) mClipboardNotepadView.setVisibility(View.GONE);
-        mCodeSymbolsView.setVisibility(View.VISIBLE);
-        mIsShowingCodeSymbols = true;
-        mIsShowingClipboard = false;
-        mIsShowingEmoji = false;
-        mIsShowingVoice = false;
     }
 
     public void hideCodeSymbols() {
-        if (mCodeSymbolsView == null) return;
-        mCodeSymbolsView.setVisibility(View.GONE);
-        if (mKeyboardSwitcher != null) {
-            LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
-            if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice && !mIsShowingClipboard) {
-                inputView.setVisibility(View.VISIBLE);
+        try {
+            if (mCodeSymbolsView == null) return;
+            mCodeSymbolsView.setVisibility(View.GONE);
+            if (mKeyboardSwitcher != null) {
+                LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
+                if (inputView != null && !mIsShowingEmoji && !mIsShowingVoice && !mIsShowingClipboard) {
+                    inputView.setVisibility(View.VISIBLE);
+                }
             }
+            mIsShowingCodeSymbols = false;
+        } catch (Throwable t) {
+            Log.e(TAG, "Error in hideCodeSymbols", t);
         }
-        mIsShowingCodeSymbols = false;
+    }
+
+    public void showCodeSymbolsInStrip() {
+        if (mCandidateView == null) return;
+        List<CharSequence> codeList = new ArrayList<CharSequence>();
+        String[] symbols = {
+            "{", "}", "[", "]", "(", ")", "</>", "/>", "=>", "->",
+            "==", "!=", "===", "!==", "&&", "||", "!", ";", ":", "\\",
+            "/", "$", "_", "\"", "'", "`", "?", "??", "?.", "+",
+            "-", "*", "=", "%", "&", "|", "^", "<", ">", "#", "@", "~"
+        };
+        for (String s : symbols) {
+            codeList.add(s);
+        }
+        mCandidateView.setSuggestions(codeList, false, false, false);
+        setCandidatesViewShown(true);
+        if (mCandidateViewContainer != null) {
+            mCandidateViewContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     public void updateStripButtonsVisibility() {
@@ -1450,6 +1524,7 @@ public class LatinIME extends InputMethodService implements
         hideVoiceInput();
         hideClipboardNotepad();
         hideCodeSymbols();
+        mIsShowingCodeSymbolsInStrip = false;
         // Remove penging messages related to update suggestions
         mHandler.removeMessages(MSG_UPDATE_SUGGESTIONS);
         mHandler.removeMessages(MSG_UPDATE_OLD_SUGGESTIONS);
@@ -1945,16 +2020,18 @@ public class LatinIME extends InputMethodService implements
     }
 
     private void onOptionKeyPressed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Input method selector is available as a button in the soft key area, so just launch
-            // HK settings directly. This also works around the alert dialog being clipped
-            // in Android O.
-            startActivity(new Intent(this, LatinIMESettings.class));
-        } else {
-            // Show an options menu with choices to change input method or open HK settings.
-            if (!isShowingOptionDialog()) {
-                 showOptionsMenu();
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Intent intent = new Intent(this, LatinIMESettings.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } else {
+                if (!isShowingOptionDialog()) {
+                    showOptionsMenu();
+                }
             }
+        } catch (Throwable t) {
+            Log.e(TAG, "Error in onOptionKeyPressed", t);
         }
     }
 
@@ -2995,6 +3072,10 @@ public class LatinIME extends InputMethodService implements
     }
 
     private void updateSuggestions() {
+        if (mIsShowingCodeSymbolsInStrip) {
+            showCodeSymbolsInStrip();
+            return;
+        }
         LatinKeyboardView inputView = mKeyboardSwitcher.getInputView();
         ((LatinKeyboard) inputView.getKeyboard()).setPreferredLetters(null);
 
@@ -3094,10 +3175,22 @@ public class LatinIME extends InputMethodService implements
     }
 
     public void pickSuggestionManually(int index, CharSequence suggestion) {
+        InputConnection ic = getCurrentInputConnection();
+        if (mIsShowingCodeSymbolsInStrip) {
+            if (suggestion != null) {
+                if (ic != null) {
+                    ic.beginBatchEdit();
+                    ic.commitText(suggestion, 1);
+                    ic.endBatchEdit();
+                }
+            }
+            showCodeSymbolsInStrip();
+            return;
+        }
+
         List<CharSequence> suggestions = mCandidateView.getSuggestions();
 
         final boolean correcting = TextEntryState.isCorrecting();
-        InputConnection ic = getCurrentInputConnection();
         if (ic != null) {
             ic.beginBatchEdit();
         }
