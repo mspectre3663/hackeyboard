@@ -61,6 +61,7 @@ public class KeyboardSwitcher implements
 
     public static final String DEFAULT_LAYOUT_ID = "0";
     public static final String PREF_KEYBOARD_LAYOUT = "pref_keyboard_layout";
+    public static final String PREF_KEY_CORNER_RADIUS = "pref_key_corner_radius";
     private static final int[] THEMES = new int[] {
         R.layout.input_ics,
         R.layout.input_gingerbread,
@@ -88,6 +89,37 @@ public class KeyboardSwitcher implements
         // 2 Samsung Galaxy S5 Themes (Android 4.4.4 KitKat TouchWiz)
         R.layout.input_galaxy_s5_light, // 20
         R.layout.input_galaxy_s5_dark, // 21
+        // 30 New Themes (22 to 51)
+        R.layout.input_dynamic_theme, // 22: Tokyo Night
+        R.layout.input_dynamic_theme, // 23: Dracula Classic
+        R.layout.input_dynamic_theme, // 24: Catppuccin Mocha
+        R.layout.input_dynamic_theme, // 25: Catppuccin Latte
+        R.layout.input_dynamic_theme, // 26: Nord Aurora
+        R.layout.input_dynamic_theme, // 27: Nord Frost Light
+        R.layout.input_dynamic_theme, // 28: One Dark Pro
+        R.layout.input_dynamic_theme, // 29: Monokai Pro
+        R.layout.input_dynamic_theme, // 30: Cyberpunk Neon Yellow
+        R.layout.input_dynamic_theme, // 31: Synthwave Neon Pink
+        R.layout.input_dynamic_theme, // 32: Matrix Neon Green
+        R.layout.input_dynamic_theme, // 33: Coral Sunset
+        R.layout.input_dynamic_theme, // 34: Rose Pine Moon
+        R.layout.input_dynamic_theme, // 35: Rose Pine Dawn
+        R.layout.input_dynamic_theme, // 36: Matcha Latte
+        R.layout.input_dynamic_theme, // 37: Forest Emerald
+        R.layout.input_dynamic_theme, // 38: Ocean Abyss
+        R.layout.input_dynamic_theme, // 39: Sky Pastel Light
+        R.layout.input_dynamic_theme, // 40: Lavender Dream
+        R.layout.input_dynamic_theme, // 41: Amethyst Neon
+        R.layout.input_dynamic_theme, // 42: Amber Terminal
+        R.layout.input_dynamic_theme, // 43: Coffee Mocha
+        R.layout.input_dynamic_theme, // 44: Vintage Sepia
+        R.layout.input_dynamic_theme, // 45: Electric Cyan Glow
+        R.layout.input_dynamic_theme, // 46: Crimson Shadow
+        R.layout.input_dynamic_theme, // 47: Spring Mint Light
+        R.layout.input_dynamic_theme, // 48: Twilight Violet
+        R.layout.input_dynamic_theme, // 49: Solarized Dark
+        R.layout.input_dynamic_theme, // 50: Solarized Light
+        R.layout.input_dynamic_theme, // 51: Gruvbox Retro Dark
     };
 
     // Tables which contains resource ids for each character theme color
@@ -659,6 +691,14 @@ public class KeyboardSwitcher implements
             mInputView.setOnKeyboardActionListener(mInputMethodService);
             mInputView.setPadding(0, 0, 0, 0);
             mLayoutId = newLayout;
+
+            if (newLayout >= 22) {
+                ThemeManager.applyTheme(mInputView, newLayout);
+            }
+            ThemeManager.applyCornerRadius(mInputView);
+            if (mInputMethodService != null) {
+                ThemeManager.applyCandidateStripTheme(mInputMethodService, newLayout);
+            }
         }
         mInputMethodService.mHandler.post(new Runnable() {
             public void run() {
@@ -675,6 +715,10 @@ public class KeyboardSwitcher implements
         if (PREF_KEYBOARD_LAYOUT.equals(key)) {
             changeLatinKeyboardView(Integer.valueOf(sharedPreferences
                     .getString(key, DEFAULT_LAYOUT_ID)), true);
+        } else if (PREF_KEY_CORNER_RADIUS.equals(key)) {
+            if (mInputView != null) {
+                ThemeManager.applyCornerRadius(mInputView);
+            }
         } else if (LatinIMESettings.PREF_SETTINGS_KEY.equals(key)) {
             updateSettingsKeyState(sharedPreferences);
             recreateInputView();

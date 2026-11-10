@@ -373,6 +373,37 @@
     <string name="layout_huawei_y330_dark" translatable="false">Huawei Y330 Dark (Android 4.4)</string>
     <string name="layout_galaxy_s5_light" translatable="false">Galaxy S5 TouchWiz White (Android 4.4)</string>
     <string name="layout_galaxy_s5_dark" translatable="false">Galaxy S5 TouchWiz Dark (Android 4.4)</string>
+    <!-- 30 New Themes -->
+    <string name="layout_tokyo_night" translatable="false">Tokyo Night (توکیو نایت)</string>
+    <string name="layout_dracula" translatable="false">Dracula Classic (دراکولا)</string>
+    <string name="layout_catppuccin_mocha" translatable="false">Catppuccin Mocha (کاتپوچین موکا)</string>
+    <string name="layout_catppuccin_latte" translatable="false">Catppuccin Latte (کاتپوچین لاته)</string>
+    <string name="layout_nord_aurora" translatable="false">Nord Aurora (نورد آرورا)</string>
+    <string name="layout_nord_frost_light" translatable="false">Nord Frost Light (نورد فراست)</string>
+    <string name="layout_one_dark_pro" translatable="false">One Dark Pro (وان دارک)</string>
+    <string name="layout_monokai_pro" translatable="false">Monokai Pro (مونوکای پرو)</string>
+    <string name="layout_cyber_neon_yellow" translatable="false">Cyberpunk Neon Yellow (سایبرپانک زرد)</string>
+    <string name="layout_synthwave_pink" translatable="false">Synthwave Neon Pink (سینث‌ویو صورتی)</string>
+    <string name="layout_matrix_green" translatable="false">Matrix Neon Green (ماتریکس سبز)</string>
+    <string name="layout_coral_sunset" translatable="false">Coral Sunset (غروب مرجانی)</string>
+    <string name="layout_rose_pine_moon" translatable="false">Rose Pine Moon (رز پاین مون)</string>
+    <string name="layout_rose_pine_dawn" translatable="false">Rose Pine Dawn (رز پاین داون)</string>
+    <string name="layout_matcha_latte" translatable="false">Matcha Latte (ماچا لاته)</string>
+    <string name="layout_forest_emerald" translatable="false">Forest Emerald (زمرد جنگلی)</string>
+    <string name="layout_ocean_abyss" translatable="false">Ocean Abyss (اقیانوس عمیق)</string>
+    <string name="layout_sky_pastel_light" translatable="false">Sky Pastel Light (آبی پاستلی)</string>
+    <string name="layout_lavender_dream" translatable="false">Lavender Dream (رویای اسطوخودوس)</string>
+    <string name="layout_amethyst_neon" translatable="false">Amethyst Neon (آمیتیست بنفش)</string>
+    <string name="layout_amber_terminal" translatable="false">Amber Terminal (کهربایی رترو)</string>
+    <string name="layout_coffee_mocha" translatable="false">Coffee Mocha (قهوه موکا گرم)</string>
+    <string name="layout_vintage_sepia" translatable="false">Vintage Sepia (کاغذ قدیمی سپیا)</string>
+    <string name="layout_electric_cyan_glow" translatable="false">Electric Cyan Glow (سایان درخشان)</string>
+    <string name="layout_crimson_shadow" translatable="false">Crimson Shadow (زرشکی تاریک)</string>
+    <string name="layout_spring_mint_light" translatable="false">Spring Mint Light (نعنایی بهاری)</string>
+    <string name="layout_twilight_violet" translatable="false">Twilight Violet (شفق بنفش)</string>
+    <string name="layout_solarized_dark" translatable="false">Solarized Dark (سولارایزد تاریک)</string>
+    <string name="layout_solarized_light" translatable="false">Solarized Light (سولارایزد روشن)</string>
+    <string name="layout_gruvbox_retro_dark" translatable="false">Gruvbox Retro Dark (گرووباکس رترو)</string>
 
     <string-array name="keyboard_layout_modes" translatable="false">
         <item>@string/layout_ics</item>
@@ -401,14 +432,39 @@
         <!-- 2 Samsung Galaxy S5 themes -->
         <item>@string/layout_galaxy_s5_light</item>
         <item>@string/layout_galaxy_s5_dark</item>
+        <!-- 30 New Themes -->
+        <item>@string/layout_tokyo_night</item>
+        <item>@string/layout_dracula</item>
+        <item>@string/layout_catppuccin_mocha</item>
+        <item>@string/layout_catppuccin_latte</item>
+        <item>@string/layout_nord_aurora</item>
+        <item>@string/layout_nord_frost_light</item>
+        <item>@string/layout_one_dark_pro</item>
+        <item>@string/layout_monokai_pro</item>
+        <item>@string/layout_cyber_neon_yellow</item>
+        <item>@string/layout_synthwave_pink</item>
+        <item>@string/layout_matrix_green</item>
+        <item>@string/layout_coral_sunset</item>
+        <item>@string/layout_rose_pine_moon</item>
+        <item>@string/layout_rose_pine_dawn</item>
+        <item>@string/layout_matcha_latte</item>
+        <item>@string/layout_forest_emerald</item>
+        <item>@string/layout_ocean_abyss</item>
+        <item>@string/layout_sky_pastel_light</item>
+        <item>@string/layout_lavender_dream</item>
+        <item>@string/layout_amethyst_neon</item>
+        <item>@string/layout_amber_terminal</item>
+        <item>@string/layout_coffee_mocha</item>
+        <item>@string/layout_vintage_sepia</item>
+        <item>@string/layout_electric_cyan_glow</item>
+        <item>@string/layout_crimson_shadow</item>
+        <item>@string/layout_spring_mint_light</item>
+        <item>@string/layout_twilight_violet</item>
+        <item>@string/layout_solarized_dark</item>
+        <item>@string/layout_solarized_light</item>
+        <item>@string/layout_gruvbox_retro_dark</item>
     </string-array>
 
-    <!--
-    Do *NOT* renumber existing entries, this would lead to people's stored preferences
-    being reinterpreted as different themes. Just assign a new number that's higher
-    than any currently used one, and arrange the order as desired, matching the strings
-    above.
-    -->
     <string-array name="keyboard_layout_modes_values" translatable="false">
         <item>0</item>
         <item>6</item>
@@ -436,6 +492,55 @@
         <!-- 2 Samsung Galaxy S5 themes -->
         <item>20</item>
         <item>21</item>
+        <!-- 30 New Themes -->
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
+        <item>31</item>
+        <item>32</item>
+        <item>33</item>
+        <item>34</item>
+        <item>35</item>
+        <item>36</item>
+        <item>37</item>
+        <item>38</item>
+        <item>39</item>
+        <item>40</item>
+        <item>41</item>
+        <item>42</item>
+        <item>43</item>
+        <item>44</item>
+        <item>45</item>
+        <item>46</item>
+        <item>47</item>
+        <item>48</item>
+        <item>49</item>
+        <item>50</item>
+        <item>51</item>
+    </string-array>
+
+    <string name="title_key_corner_radius">حاشیه گرد دکمه‌های کیبورد (Corner Radius)</string>
+    <string-array name="key_corner_radius_entries" translatable="false">
+        <item>پیش‌فرض تم (مربعی استاندارد)</item>
+        <item>گرد ملایم (4dp)</item>
+        <item>گرد متوسط (8dp)</item>
+        <item>گرد زیاد (12dp)</item>
+        <item>گرد خیلی زیاد (16dp)</item>
+        <item>دایره‌ای / کپسولی کامل (Circle / Capsule)</item>
+    </string-array>
+    <string-array name="key_corner_radius_values" translatable="false">
+        <item>0</item>
+        <item>4</item>
+        <item>8</item>
+        <item>12</item>
+        <item>16</item>
+        <item>99</item>
     </string-array>
 
     <string name="subtype_mode_keyboard">keyboard</string>

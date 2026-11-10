@@ -159,7 +159,7 @@ public class LatinIME extends InputMethodService implements
 
     // private LatinKeyboardView mInputView;
     private LinearLayout mInputContainer;
-    private LinearLayout mCandidateViewContainer;
+    /* package */ LinearLayout mCandidateViewContainer;
     private CandidateView mCandidateView;
     private Suggest mSuggest;
     private CompletionInfo[] mCompletions;
@@ -857,6 +857,11 @@ public class LatinIME extends InputMethodService implements
         LinearLayout.LayoutParams candidateLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, stripHeight);
         mInputContainer.addView(mCandidateViewContainer, candidateLp);
+        try {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            int layoutId = Integer.parseInt(prefs.getString(KeyboardSwitcher.PREF_KEYBOARD_LAYOUT, "0"));
+            ThemeManager.applyCandidateStripTheme(this, layoutId);
+        } catch (Exception ignored) {}
 
         if (inputView != null) {
             LinearLayout.LayoutParams kbdLp = new LinearLayout.LayoutParams(
@@ -3519,6 +3524,12 @@ public class LatinIME extends InputMethodService implements
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
             String key) {
         Log.i("PCKeyboard", "onSharedPreferenceChanged()");
+        if (KeyboardSwitcher.PREF_KEYBOARD_LAYOUT.equals(key)) {
+            try {
+                int layoutId = Integer.parseInt(sharedPreferences.getString(key, "0"));
+                ThemeManager.applyCandidateStripTheme(this, layoutId);
+            } catch (Exception ignored) {}
+        }
         boolean needReload = false;
         Resources res = getResources();
         

@@ -30,12 +30,15 @@ import android.graphics.Paint;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
+import android.content.SharedPreferences;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.preference.PreferenceManager;
 
 import org.pocketworkstation.pckeyboard.Keyboard.Key;
 
@@ -271,6 +274,10 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
     private final Paint mPaintHint;
     private final Rect mPadding;
     private final Rect mClipRegion = new Rect(0, 0, 0, 0);
+    private float mKeyCornerRadius = 0f;
+    private float mDensity = 1.0f;
+    private final Path mCornerClipPath = new Path();
+    private final RectF mCornerClipRect = new RectF();
     private int mViewWidth;
     // This map caches key label text height in pixel as value and key label text size as map key.
     private final HashMap<Integer, Integer> mTextHeightCache = new HashMap<Integer, Integer>();
@@ -558,6 +565,8 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         mKeyBackground.getPadding(mPadding);
 
         mSwipeThreshold = (int) (300 * res.getDisplayMetrics().density);
+        mDensity = res.getDisplayMetrics().density;
+        updateKeyCornerRadius();
         // TODO: Refer frameworks/base/core/res/res/values/config.xml
         // TODO(klausw): turn off mDisambiguateSwipe if no swipe actions are set?
         mDisambiguateSwipe = res.getBoolean(R.bool.config_swipeDisambiguation);
@@ -1007,7 +1016,21 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             if (mBackgroundAlpha != 255) {
                 keyBackground.setAlpha(mBackgroundAlpha);
             }
+            boolean customRounding = mKeyCornerRadius > 0;
+            if (customRounding) {
+                canvas.save();
+                float maxR = Math.min(key.width, key.height) / 2.0f;
+                float radiusPx = (mKeyCornerRadius >= 99f) ? maxR : Math.min(mKeyCornerRadius * mDensity, maxR);
+                float inset = Math.min(1.5f * mDensity, radiusPx / 2.0f);
+                mCornerClipRect.set(inset, inset, key.width - inset, key.height - inset);
+                mCornerClipPath.reset();
+                mCornerClipPath.addRoundRect(mCornerClipRect, radiusPx, radiusPx, Path.Direction.CW);
+                canvas.clipPath(mCornerClipPath);
+            }
             keyBackground.draw(canvas);
+            if (customRounding) {
+                canvas.restore();
+            }
             if (yscale != 1.0f)  canvas.restore();
 
             boolean shouldDrawIcon = true;
@@ -1875,5 +1898,53 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             return true;
         }
         return false;
+    }
+
+    public void updateKeyCornerRadius() {
+        try {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+            String radiusStr = prefs.getString("pref_key_corner_radius", "0");
+            mKeyCornerRadius = Float.parseFloat(radiusStr);
+        } catch (Exception e) {
+            mKeyCornerRadius = 0f;
+        }
+    }
+
+    public void setKeyCornerRadius(float radius) {
+        mKeyCornerRadius = radius;
+        invalidateAllKeys();
+    }
+
+    public void setKeyBackground(Drawable d) {
+        mKeyBackground = d;
+        if (mKeyBackground != null) {
+            mKeyBackground.getPadding(mPadding);
+        }
+        invalidateAllKeys();
+    }
+
+    public void setKeyTextColor(int color) {
+        mKeyTextColor = color;
+        invalidateAllKeys();
+    }
+
+    public void setKeyHintColor(int color) {
+        mKeyHintColor = color;
+        invalidateAllKeys();
+    }
+
+    public void setKeyCursorColor(int color) {
+        mKeyCursorColor = color;
+        invalidateAllKeys();
+    }
+
+    public void setInvertSymbols(boolean invert) {
+        mInvertSymbols = invert;
+        invalidateAllKeys();
+    }
+
+    public void setRecolorSymbols(boolean recolor) {
+        mRecolorSymbols = recolor;
+        invalidateAllKeys();
     }
 }

@@ -60,13 +60,21 @@
             android:persistent="true"
             android:title="@string/title_top_row_scale" />
         
-        <org.pocketworkstation.pckeyboard.AutoSummaryListPreference
+        <org.pocketworkstation.pckeyboard.ThemePickerPreference
             android:defaultValue="0"
             android:entries="@array/keyboard_layout_modes"
             android:entryValues="@array/keyboard_layout_modes_values"
             android:key="pref_keyboard_layout"
             android:persistent="true"
             android:title="@string/keyboard_layout" />
+
+        <org.pocketworkstation.pckeyboard.AutoSummaryListPreference
+            android:defaultValue="0"
+            android:entries="@array/key_corner_radius_entries"
+            android:entryValues="@array/key_corner_radius_values"
+            android:key="pref_key_corner_radius"
+            android:persistent="true"
+            android:title="@string/title_key_corner_radius" />
         
         <org.pocketworkstation.pckeyboard.AutoSummaryListPreference
             android:defaultValue="@string/default_render_mode"
