@@ -12,6 +12,19 @@ on:
           - all
           - debug (امضا شده با کلید دیباگ - آماده نصب)
           - release-unsigned (خروجی Release کاملاً بدون امضا)
+      create_release:
+        description: 'انتشار مستقیم در صفحه Releases گیت‌هاب؟'
+        required: true
+        default: true
+        type: boolean
+      release_tag:
+        description: 'تگ ریلیز (اختیاری - پیش‌فرض: v1.41.1-build[شماره])'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -47,6 +60,31 @@ jobs:
         if: ${{ github.event.inputs.build_type == 'all' || contains(github.event.inputs.build_type, 'release') }}
         run: ./gradlew assembleRelease --stacktrace || gradle assembleRelease --stacktrace
 
+      - name: Prepare APK Files for Release
+        run: |
+          mkdir -p release-apks
+          DEBUG_APK=$(find app/build/outputs/apk/debug/ -name "*.apk" 2>/dev/null | head -n 1)
+          if [ -n "$DEBUG_APK" ] && [ -f "$DEBUG_APK" ]; then
+            cp "$DEBUG_APK" release-apks/HackersKeyboard-Debug.apk
+          fi
+
+          RELEASE_APK=$(find app/build/outputs/apk/release/ -name "*.apk" 2>/dev/null | head -n 1)
+          if [ -n "$RELEASE_APK" ] && [ -f "$RELEASE_APK" ]; then
+            cp "$RELEASE_APK" release-apks/HackersKeyboard-Release-Unsigned.apk
+          fi
+
+          CUSTOM_TAG="${{ github.event.inputs.release_tag }}"
+          if [ -n "$CUSTOM_TAG" ]; then
+            TAG="$CUSTOM_TAG"
+          else
+            TAG="v1.41.1-build${{ github.run_number }}"
+          fi
+
+          DATE_STR=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+          echo "TAG_NAME=$TAG" >> $GITHUB_ENV
+          echo "RELEASE_TITLE=نسخه $TAG ($DATE_STR)" >> $GITHUB_ENV
+
       - name: Upload Debug APK Artifact
         if: ${{ github.event.inputs.build_type == 'all' || contains(github.event.inputs.build_type, 'debug') }}
         uses: actions/upload-artifact@v4
@@ -60,3 +98,23 @@ jobs:
         with:
           name: app-release-unsigned-apk
           path: app/build/outputs/apk/release/*.apk
+
+      - name: Publish to GitHub Releases
+        if: ${{ github.event.inputs.create_release != 'false' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.RELEASE_TITLE }}
+          body: |
+            ### ⌨️ فایل‌های نصب کیبورد (Hacker's Keyboard)
+            این نسخه به صورت خودکار از طریق GitHub Actions بیلد شده و فایل‌های APK آماده دانلود مستقیم می‌باشند:
+
+            * 🟢 **HackersKeyboard-Debug.apk:** نسخه امضا شده با کلید دیباگ — آماده **نصب مستقیم** روی تمامی گوشی‌های اندروید (بدون نیاز به ساین).
+            * 🟡 **HackersKeyboard-Release-Unsigned.apk:** نسخه ریلیز خام (Unsigned) برای توسعه‌دهندگانی که مایلند با کلید اختصاصی خود امضا کنند.
+
+            برای دانلود، روی فایل‌های زیر در بخش **Assets** کلیک کنید.
+          files: release-apks/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
