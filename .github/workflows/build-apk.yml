@@ -52,6 +52,18 @@ jobs:
           fi
           chmod +x gradlew
 
+      - name: Prepare Debug Keystore
+        run: |
+          if [ ! -f "debug.keystore" ]; then
+            if [ -f "debug.keystore.base64" ]; then
+              echo "Decoding debug.keystore from base64..."
+              base64 -d debug.keystore.base64 > debug.keystore
+            else
+              echo "Generating fresh debug.keystore..."
+              keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey -keypass android -storepass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            fi
+          fi
+
       - name: Build Debug APK
         if: ${{ github.event.inputs.build_type == 'all' || contains(github.event.inputs.build_type, 'debug') }}
         run: ./gradlew assembleDebug --stacktrace || gradle assembleDebug --stacktrace

@@ -12,3 +12,5 @@
 .externalNativeBuild
 !gradle/wrapper/gradle-wrapper.jar
 !gradle/wrapper/gradle-wrapper.properties
+!debug.keystore
+!debug.keystore.base64
